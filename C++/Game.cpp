@@ -77,16 +77,6 @@ std::string Game::nextQuestion(Category category)
   return question;
 }
 
-Category Game::currentCategory()
-{
-  switch (currentPlayer_->state.field % 4) {
-    case 0: return Category::Pop;
-    case 1: return Category::Science;
-    case 2: return Category::Sports;
-    default: return Category::Rock;
-  }
-}
-
 bool Game::wasCorrectlyAnswered()
 {
   if (currentPlayer_->state.inPenaltyBox) {

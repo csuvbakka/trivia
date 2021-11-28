@@ -50,7 +50,6 @@ class Game {
   Game(std::vector<Player> players, QuestionPool questionPool);
 
   std::string nextQuestion(Category category);
-  Category currentCategory();
   void updateCurrentPlayer();
 
   std::vector<Player> players_;
