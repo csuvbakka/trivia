@@ -22,15 +22,10 @@ Game::Game() : places{}, purses{}, currentPlayer(0)
     sprintf(str1, "Sports Question %d", i);
     sportsQuestions.push_back(str1);
 
-    rockQuestions.push_back(createRockQuestion(i));
+    char indexStr[127];
+    sprintf(indexStr, "Rock Question %d", i);
+    rockQuestions.push_back(indexStr);
   }
-}
-
-string Game::createRockQuestion(int index)
-{
-  char indexStr[127];
-  sprintf(indexStr, "Rock Question %d", index);
-  return indexStr;
 }
 
 bool Game::isPlayable()
