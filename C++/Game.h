@@ -27,8 +27,7 @@ class Game {
   bool isPlayable();
 
   void rollWithNextPlayer(int roll);
-  bool wasCorrectlyAnswered();
-  bool wrongAnswer();
+  bool answer(bool isCorrect);
 
  private:
   struct PlayerState {

@@ -77,8 +77,22 @@ std::string Game::nextQuestion(Category category)
   return question;
 }
 
-bool Game::wasCorrectlyAnswered()
+void Game::updateCurrentPlayer()
 {
+  ++currentPlayer_;
+  if (currentPlayer_ == players_.end())
+    currentPlayer_ = players_.begin();
+}
+
+bool Game::answer(bool isCorrect)
+{
+  if (!isCorrect) {
+  std::cout << "Question was incorrectly answered\n";
+  std::cout << currentPlayer_->name + " was sent to the penalty box\n";
+  currentPlayer_->state.inPenaltyBox = true;
+
+  return true;
+  } else {
   if (currentPlayer_->state.inPenaltyBox) {
     if (isGettingOutOfPenaltyBox_) {
       std::cout << "Answer was correct!!!!\n";
@@ -95,20 +109,5 @@ bool Game::wasCorrectlyAnswered()
   const bool didPlayerWin = currentPlayer_->state.coins == 6;
 
   return !didPlayerWin;
-}
-
-void Game::updateCurrentPlayer()
-{
-  ++currentPlayer_;
-  if (currentPlayer_ == players_.end())
-    currentPlayer_ = players_.begin();
-}
-
-bool Game::wrongAnswer()
-{
-  std::cout << "Question was incorrectly answered\n";
-  std::cout << currentPlayer_->name + " was sent to the penalty box\n";
-  currentPlayer_->state.inPenaltyBox = true;
-
-  return true;
+  }
 }

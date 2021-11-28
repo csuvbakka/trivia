@@ -28,9 +28,9 @@ int main()
     aGame.rollWithNextPlayer(rand() % 5 + 1);
 
     if (rand() % 9 == 7) {
-      notAWinner = aGame.wrongAnswer();
+      notAWinner = aGame.answer(false);
     } else {
-      notAWinner = aGame.wasCorrectlyAnswered();
+      notAWinner = aGame.answer(true);
     }
   } while (notAWinner);
 }
