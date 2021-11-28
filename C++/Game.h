@@ -8,11 +8,22 @@
 #define GAME_H_
 
 enum class Category { Pop, Science, Sports, Rock };
-constexpr std::string_view ToStringView(Category category);
+constexpr std::string_view ToStringView(Category category)
+{
+  switch (category) {
+    case Category::Pop: return "Pop";
+    case Category::Science: return "Science";
+    case Category::Sports: return "Sports";
+    case Category::Rock: return "Rock";
+  }
+  throw std::runtime_error("Unknown category.");
+}
 
 class Game {
  public:
-  static Game Create(std::vector<std::string> playerNames);
+  using QuestionPool = std::unordered_map<Category, std::list<std::string>>;
+
+  static Game Create(std::vector<std::string> playerNames, QuestionPool questionPool);
   bool isPlayable();
 
   void roll(int roll);
@@ -20,7 +31,6 @@ class Game {
   bool wrongAnswer();
 
  private:
-
   struct PlayerState {
     PlayerState(int place, int purse, bool inPenaltyBox)
         : place(place), purse(purse), inPenaltyBox(inPenaltyBox)
@@ -37,7 +47,7 @@ class Game {
     PlayerState state;
   };
 
-  Game(std::vector<Player> players);
+  Game(std::vector<Player> players, QuestionPool questionPool);
 
   bool didPlayerWin();
   void askQuestion();
@@ -46,7 +56,7 @@ class Game {
   void makeNextPlayerTheCurrent();
 
   std::vector<Player> players;
-  std::unordered_map<Category, std::list<std::string>> questions;
+  QuestionPool questionPool;
 
   unsigned int currentPlayer;
   bool isGettingOutOfPenaltyBox;

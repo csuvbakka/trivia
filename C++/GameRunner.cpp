@@ -1,12 +1,30 @@
 ﻿#include <stdlib.h>
 #include "Game.h"
 
+#include <string>
+
 static bool notAWinner;
+
+Game::QuestionPool generateQuestions()
+{
+  Game::QuestionPool questionPool;
+  const auto generateQuestion = [&questionPool](Category category, int index) {
+    questionPool[category].emplace_back(std::string(ToStringView(category)) + " Question "
+                                        + std::to_string(index));
+  };
+  for (int i = 0; i < 50; i++) {
+    generateQuestion(Category::Pop, i);
+    generateQuestion(Category::Science, i);
+    generateQuestion(Category::Sports, i);
+    generateQuestion(Category::Rock, i);
+  }
+  return questionPool;
+}
 
 int main()
 {
   srand(time(NULL));
-  auto aGame = Game::Create({"Chet", "Pat", "Sue"});
+  auto aGame = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
 
   do {
     aGame.roll(rand() % 5 + 1);

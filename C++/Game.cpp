@@ -4,28 +4,12 @@
 #include <iostream>
 #include <sstream>
 
-constexpr std::string_view ToStringView(Category category)
+Game::Game(std::vector<Player> players, QuestionPool questionPool)
+    : players(std::move(players)), questionPool(std::move(questionPool)), currentPlayer(0)
 {
-  switch (category) {
-    case Category::Pop: return "Pop";
-    case Category::Science: return "Science";
-    case Category::Sports: return "Sports";
-    case Category::Rock: return "Rock";
-  }
-  throw std::runtime_error("Unknown category.");
 }
 
-Game::Game(std::vector<Player> players) : players(std::move(players)), currentPlayer(0)
-{
-  for (int i = 0; i < 50; i++) {
-    questions[Category::Pop].emplace_back("Pop Question " + std::to_string(i));
-    questions[Category::Science].emplace_back("Science Question " + std::to_string(i));
-    questions[Category::Sports].emplace_back("Sports Question " + std::to_string(i));
-    questions[Category::Rock].emplace_back("Rock Question " + std::to_string(i));
-  }
-}
-
-Game Game::Create(std::vector<std::string> playerNames)
+Game Game::Create(std::vector<std::string> playerNames, QuestionPool questionPool)
 {
   std::vector<Player> players;
   players.reserve(playerNames.size());
@@ -36,7 +20,7 @@ Game Game::Create(std::vector<std::string> playerNames)
     std::cout << "They are player number " << players.size() << std::endl;
   }
 
-  return Game(std::move(players));
+  return Game(std::move(players), std::move(questionPool));
 }
 
 bool Game::isPlayable()
@@ -75,7 +59,7 @@ void Game::movePlayer(int n_steps)
 
 void Game::askQuestion()
 {
-  auto& questionGroup = questions[currentCategory()];
+  auto& questionGroup = questionPool[currentCategory()];
   std::cout << questionGroup.front() << std::endl;
   questionGroup.pop_front();
 }
