@@ -1,4 +1,5 @@
-FILES = GameRunner.cpp Game.cpp Game.h
+CLIENT_FILES = GameRunner.cpp
+GAME_FILES = Game.cpp Game.h
 TEST_FILES = Game.cpp Game.h
 CC = g++
 OPTS = -std=c++17 -Wall -Wextra -Werror
@@ -16,7 +17,10 @@ tests: test runTest
 	mkdir -p out
 
 build: .outputFolder
-	$(CC) $(FILES) $(OPTS) $(OUTOPTS) $(OUT)
+	$(CC) $(CLIENT_FILES) $(GAME_FILES) $(OPTS) $(OUTOPTS) $(OUT)
+
+buildFixedSeed: .outputFolder
+	$(CC) FixedSeed.cpp $(GAME_FILES) $(OPTS) $(OUTOPTS) $(OUT)
 
 run: 
 	./$(OUT)
