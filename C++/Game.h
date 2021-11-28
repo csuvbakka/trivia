@@ -27,7 +27,6 @@ class Game {
   bool isPlayable();
   bool add(std::string playerName);
 
-  int howManyPlayers();
   void roll(int roll);
 
  private:

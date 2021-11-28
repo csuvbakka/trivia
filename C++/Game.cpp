@@ -16,24 +16,19 @@ Game::Game() : places{}, purses{}, currentPlayer(0)
 
 bool Game::isPlayable()
 {
-  return (howManyPlayers() >= 2);
+  return (players.size() >= 2);
 }
 
 bool Game::add(std::string playerName)
 {
   players.push_back(playerName);
-  places[howManyPlayers()]       = 0;
-  purses[howManyPlayers()]       = 0;
-  inPenaltyBox[howManyPlayers()] = false;
+  places[players.size()]       = 0;
+  purses[players.size()]       = 0;
+  inPenaltyBox[players.size()] = false;
 
   std::cout << playerName << " was added" << std::endl;
   std::cout << "They are player number " << players.size() << std::endl;
   return true;
-}
-
-int Game::howManyPlayers()
-{
-  return players.size();
 }
 
 void Game::roll(int roll)
