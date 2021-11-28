@@ -1,0 +1,51 @@
+BasedOnStyle: google
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: 'true'
+AlignOperands: 'true'
+AlignTrailingComments: 'true'
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: 'false'
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: 'false'
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakTemplateDeclarations: 'true'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BraceWrapping:
+    AfterClass: 'false'
+    AfterControlStatement: 'false'
+    AfterEnum: 'false'
+    AfterFunction: 'true'
+    AfterNamespace: 'false'
+    AfterStruct: 'false'
+    AfterUnion: 'false'
+    BeforeCatch: 'false'
+    BeforeElse: 'false'
+    IndentBraces: 'false'
+BreakBeforeBraces: Custom
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: 'true'
+BreakConstructorInitializersBeforeComma: 'true'
+ColumnLimit: '100'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+ConstructorInitializerIndentWidth: '4'
+DerivePointerAlignment: 'false'
+IncludeBlocks: Preserve
+IndentCaseLabels: 'true'
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+Language: Cpp
+MaxEmptyLinesToKeep: '1'
+NamespaceIndentation: None
+PointerAlignment: Left
+SpaceAfterCStyleCast: 'false'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeParens: ControlStatements
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInContainerLiterals: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+Standard: Latest
+UseTab: Never

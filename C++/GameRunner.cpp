@@ -5,27 +5,20 @@ static bool notAWinner;
 
 int main()
 {
+  srand(time(NULL));
+  Game aGame;
 
-	srand(time(NULL));
-	Game aGame;
+  aGame.add("Chet");
+  aGame.add("Pat");
+  aGame.add("Sue");
 
-	aGame.add("Chet");
-	aGame.add("Pat");
-	aGame.add("Sue");
+  do {
+    aGame.roll(rand() % 5 + 1);
 
-	do
-	{
-
-		aGame.roll(rand() % 5 + 1);
-
-		if (rand() % 9 == 7)
-		{
-			notAWinner = aGame.wrongAnswer();
-		}
-		else
-		{
-			notAWinner = aGame.wasCorrectlyAnswered();
-		}
-	} while (notAWinner);
-
+    if (rand() % 9 == 7) {
+      notAWinner = aGame.wrongAnswer();
+    } else {
+      notAWinner = aGame.wasCorrectlyAnswered();
+    }
+  } while (notAWinner);
 }
