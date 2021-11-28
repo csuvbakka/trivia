@@ -32,12 +32,12 @@ class Game {
 
  private:
   struct PlayerState {
-    PlayerState(int place, int purse, bool inPenaltyBox)
-        : place(place), purse(purse), inPenaltyBox(inPenaltyBox)
+    PlayerState(int place, int coins, bool inPenaltyBox)
+        : place(place), coins(coins), inPenaltyBox(inPenaltyBox)
     {
     }
     int place;
-    int purse;
+    int coins;
     bool inPenaltyBox;
   };
 

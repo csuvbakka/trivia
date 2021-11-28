@@ -98,11 +98,11 @@ bool Game::wasCorrectlyAnswered()
   } else {
     std::cout << "Answer was corrent!!!!\n";
   }
-  currentPlayer_->state.purse++;
-  std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.purse
+  currentPlayer_->state.coins++;
+  std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.coins
             << " Gold Coins.\n";
 
-  const bool didPlayerWin = currentPlayer_->state.purse == 6;
+  const bool didPlayerWin = currentPlayer_->state.coins == 6;
   makeNextPlayerTheCurrent();
 
   return !didPlayerWin;
