@@ -1,6 +1,7 @@
 #include <iostream>
 #include <list>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #ifndef GAME_H_
@@ -43,11 +44,7 @@ class Game {
   void makeNextPlayerTheCurrent();
 
   std::vector<Player> players;
-
-  std::list<std::string> popQuestions;
-  std::list<std::string> scienceQuestions;
-  std::list<std::string> sportsQuestions;
-  std::list<std::string> rockQuestions;
+  std::unordered_map<Category, std::list<std::string>> questions;
 
   unsigned int currentPlayer;
   bool isGettingOutOfPenaltyBox;

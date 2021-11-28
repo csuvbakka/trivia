@@ -18,10 +18,10 @@ constexpr std::string_view ToStringView(Category category)
 Game::Game() : currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
-    popQuestions.emplace_back("Pop Question " + std::to_string(i));
-    scienceQuestions.emplace_back("Science Question " + std::to_string(i));
-    sportsQuestions.emplace_back("Sports Question " + std::to_string(i));
-    rockQuestions.emplace_back("Rock Question " + std::to_string(i));
+    questions[Category::Pop].emplace_back("Pop Question " + std::to_string(i));
+    questions[Category::Science].emplace_back("Science Question " + std::to_string(i));
+    questions[Category::Sports].emplace_back("Sports Question " + std::to_string(i));
+    questions[Category::Rock].emplace_back("Rock Question " + std::to_string(i));
   }
 }
 
@@ -70,22 +70,9 @@ void Game::movePlayer(int n_steps)
 
 void Game::askQuestion()
 {
-  if (currentCategory() == Category::Pop) {
-    std::cout << popQuestions.front() << std::endl;
-    popQuestions.pop_front();
-  }
-  if (currentCategory() == Category::Science) {
-    std::cout << scienceQuestions.front() << std::endl;
-    scienceQuestions.pop_front();
-  }
-  if (currentCategory() == Category::Sports) {
-    std::cout << sportsQuestions.front() << std::endl;
-    sportsQuestions.pop_front();
-  }
-  if (currentCategory() == Category::Rock) {
-    std::cout << rockQuestions.front() << std::endl;
-    rockQuestions.pop_front();
-  }
+  auto& questionGroup = questions[currentCategory()];
+  std::cout << questionGroup.front() << std::endl;
+  questionGroup.pop_front();
 }
 
 Category Game::currentCategory()
