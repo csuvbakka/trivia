@@ -16,9 +16,7 @@ class Game {
   bool add(std::string playerName);
 
   void roll(int roll);
-  void movePlayer(int n_steps);
   bool wasCorrectlyAnswered();
-  void makeNextPlayerTheCurrent();
   bool wrongAnswer();
 
  private:
@@ -41,6 +39,8 @@ class Game {
   bool didPlayerWin();
   void askQuestion();
   Category currentCategory();
+  void movePlayer(int n_steps);
+  void makeNextPlayerTheCurrent();
 
   std::vector<Player> players;
 
