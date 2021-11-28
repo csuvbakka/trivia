@@ -32,12 +32,17 @@ class Game {
     bool inPenaltyBox;
   };
 
+  struct Player {
+    Player(std::string name, PlayerState state) : name(std::move(name)), state(state) {}
+    std::string name;
+    PlayerState state;
+  };
+
   bool didPlayerWin();
   void askQuestion();
   Category currentCategory();
 
-  std::vector<std::string> players;
-  std::vector<PlayerState> playerStates;
+  std::vector<Player> players;
 
   std::list<std::string> popQuestions;
   std::list<std::string> scienceQuestions;

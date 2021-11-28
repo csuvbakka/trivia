@@ -32,40 +32,40 @@ bool Game::isPlayable()
 
 bool Game::add(std::string playerName)
 {
-  players.push_back(playerName);
-  playerStates.emplace_back(0, 0, false);
+  players.emplace_back(std::move(playerName), PlayerState{0, 0, false});
 
-  std::cout << playerName << " was added" << std::endl;
+  std::cout << players.back().name << " was added" << std::endl;
   std::cout << "They are player number " << players.size() << std::endl;
   return true;
 }
 
 void Game::roll(int roll)
 {
-  std::cout << players[currentPlayer] << " is the current player" << std::endl;
+  std::cout << players[currentPlayer].name << " is the current player" << std::endl;
   std::cout << "They have rolled a " << roll << std::endl;
 
-  if (playerStates[currentPlayer].inPenaltyBox) {
+  if (players[currentPlayer].state.inPenaltyBox) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox = true;
-      std::cout << players[currentPlayer] << " is getting out of the penalty box" << std::endl;
+      std::cout << players[currentPlayer].name << " is getting out of the penalty box" << std::endl;
     } else {
       isGettingOutOfPenaltyBox = false;
-      std::cout << players[currentPlayer] << " is not getting out of the penalty box" << std::endl;
+      std::cout << players[currentPlayer].name << " is not getting out of the penalty box"
+                << std::endl;
       return;
     }
   }
 
   movePlayer(roll);
-  std::cout << players[currentPlayer] << "'s new location is " << playerStates[currentPlayer].place
-            << std::endl;
+  std::cout << players[currentPlayer].name << "'s new location is "
+            << players[currentPlayer].state.place << std::endl;
   std::cout << "The category is " << ToStringView(currentCategory()) << std::endl;
   askQuestion();
 }
 
 void Game::movePlayer(int n_steps)
 {
-  playerStates[currentPlayer].place = (playerStates[currentPlayer].place + n_steps) % 12;
+  players[currentPlayer].state.place = (players[currentPlayer].state.place + n_steps) % 12;
 }
 
 void Game::askQuestion()
@@ -90,7 +90,7 @@ void Game::askQuestion()
 
 Category Game::currentCategory()
 {
-  switch (playerStates[currentPlayer].place % 4) {
+  switch (players[currentPlayer].state.place % 4) {
     case 0: return Category::Pop;
     case 1: return Category::Science;
     case 2: return Category::Sports;
@@ -100,11 +100,11 @@ Category Game::currentCategory()
 
 bool Game::wasCorrectlyAnswered()
 {
-  if (playerStates[currentPlayer].inPenaltyBox) {
+  if (players[currentPlayer].state.inPenaltyBox) {
     if (isGettingOutOfPenaltyBox) {
       std::cout << "Answer was correct!!!!" << std::endl;
-      playerStates[currentPlayer].purse++;
-      std::cout << players[currentPlayer] << " now has " << playerStates[currentPlayer].purse
+      players[currentPlayer].state.purse++;
+      std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
                 << " Gold Coins." << std::endl;
 
       bool winner = didPlayerWin();
@@ -118,8 +118,8 @@ bool Game::wasCorrectlyAnswered()
 
   } else {
     std::cout << "Answer was corrent!!!!" << std::endl;
-    playerStates[currentPlayer].purse++;
-    std::cout << players[currentPlayer] << " now has " << playerStates[currentPlayer].purse
+    players[currentPlayer].state.purse++;
+    std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
               << " Gold Coins." << std::endl;
 
     bool winner = didPlayerWin();
@@ -137,8 +137,8 @@ void Game::makeNextPlayerTheCurrent()
 bool Game::wrongAnswer()
 {
   std::cout << "Question was incorrectly answered" << std::endl;
-  std::cout << players[currentPlayer] + " was sent to the penalty box" << std::endl;
-  playerStates[currentPlayer].inPenaltyBox = true;
+  std::cout << players[currentPlayer].name + " was sent to the penalty box" << std::endl;
+  players[currentPlayer].state.inPenaltyBox = true;
 
   makeNextPlayerTheCurrent();
   return true;
@@ -146,5 +146,5 @@ bool Game::wrongAnswer()
 
 bool Game::didPlayerWin()
 {
-  return !(playerStates[currentPlayer].purse == 6);
+  return !(players[currentPlayer].state.purse == 6);
 }
