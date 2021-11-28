@@ -49,9 +49,8 @@ class Game {
 
   Game(std::vector<Player> players, QuestionPool questionPool);
 
-  void askQuestion(Category category);
+  std::string nextQuestion(Category category);
   Category currentCategory();
-  void movePlayer(int n_steps);
   void makeNextPlayerTheCurrent();
 
   std::vector<Player> players_;

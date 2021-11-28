@@ -4,6 +4,19 @@
 #include <iostream>
 #include <sstream>
 
+namespace {
+
+Category categoryForField(int field)
+{
+  switch (field % 4) {
+    case 0: return Category::Pop;
+    case 1: return Category::Science;
+    case 2: return Category::Sports;
+    default: return Category::Rock;
+  }
+}
+}  // namespace
+
 Game::Game(std::vector<Player> players, QuestionPool questionPool)
     : players_(std::move(players))
     , questionPool_(std::move(questionPool))
@@ -46,22 +59,21 @@ void Game::roll(int roll)
     }
   }
 
-  movePlayer(roll);
+  currentPlayer_->state.place = (currentPlayer_->state.place + roll) % 12;
+  const auto category         = categoryForField(currentPlayer_->state.place);
+  const auto question         = nextQuestion(category);
+
   std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.place << "\n";
-  std::cout << "The category is " << ToStringView(currentCategory()) << "\n";
-  askQuestion(currentCategory());
+  std::cout << "The category is " << ToStringView(category) << "\n";
+  std::cout << question << "\n";
 }
 
-void Game::movePlayer(int n_steps)
-{
-  currentPlayer_->state.place = (currentPlayer_->state.place + n_steps) % 12;
-}
-
-void Game::askQuestion(Category category)
+std::string Game::nextQuestion(Category category)
 {
   auto& questionGroup = questionPool_[category];
-  std::cout << questionGroup.front() << "\n";
+  auto question       = questionGroup.front();
   questionGroup.pop_front();
+  return question;
 }
 
 Category Game::currentCategory()
