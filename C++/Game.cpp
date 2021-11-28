@@ -4,6 +4,17 @@
 #include <iostream>
 #include <sstream>
 
+constexpr std::string_view ToStringView(Category category)
+{
+  switch (category) {
+    case Category::Pop: return "Pop";
+    case Category::Science: return "Science";
+    case Category::Sports: return "Sports";
+    case Category::Rock: return "Rock";
+  }
+  throw std::runtime_error("Unknown category.");
+}
+
 Game::Game() : places{}, purses{}, currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
@@ -50,7 +61,7 @@ void Game::roll(int roll)
   movePlayer(roll);
   std::cout << players[currentPlayer] << "'s new location is " << places[currentPlayer]
             << std::endl;
-  std::cout << "The category is " << currentCategory() << std::endl;
+  std::cout << "The category is " << ToStringView(currentCategory()) << std::endl;
   askQuestion();
 }
 
@@ -61,45 +72,45 @@ void Game::movePlayer(int n_steps)
 
 void Game::askQuestion()
 {
-  if (currentCategory() == "Pop") {
+  if (currentCategory() == Category::Pop) {
     std::cout << popQuestions.front() << std::endl;
     popQuestions.pop_front();
   }
-  if (currentCategory() == "Science") {
+  if (currentCategory() == Category::Science) {
     std::cout << scienceQuestions.front() << std::endl;
     scienceQuestions.pop_front();
   }
-  if (currentCategory() == "Sports") {
+  if (currentCategory() == Category::Sports) {
     std::cout << sportsQuestions.front() << std::endl;
     sportsQuestions.pop_front();
   }
-  if (currentCategory() == "Rock") {
+  if (currentCategory() == Category::Rock) {
     std::cout << rockQuestions.front() << std::endl;
     rockQuestions.pop_front();
   }
 }
 
-std::string Game::currentCategory()
+Category Game::currentCategory()
 {
   if (places[currentPlayer] == 0)
-    return "Pop";
+    return Category::Pop;
   if (places[currentPlayer] == 4)
-    return "Pop";
+    return Category::Pop;
   if (places[currentPlayer] == 8)
-    return "Pop";
+    return Category::Pop;
   if (places[currentPlayer] == 1)
-    return "Science";
+    return Category::Science;
   if (places[currentPlayer] == 5)
-    return "Science";
+    return Category::Science;
   if (places[currentPlayer] == 9)
-    return "Science";
+    return Category::Science;
   if (places[currentPlayer] == 2)
-    return "Sports";
+    return Category::Sports;
   if (places[currentPlayer] == 6)
-    return "Sports";
+    return Category::Sports;
   if (places[currentPlayer] == 10)
-    return "Sports";
-  return "Rock";
+    return Category::Sports;
+  return Category::Rock;
 }
 
 bool Game::wasCorrectlyAnswered()

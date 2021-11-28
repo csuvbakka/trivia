@@ -1,9 +1,13 @@
 #include <iostream>
 #include <list>
+#include <string_view>
 #include <vector>
 
 #ifndef GAME_H_
 #define GAME_H_
+
+enum class Category { Pop, Science, Sports, Rock };
+constexpr std::string_view ToStringView(Category category);
 
 class Game {
  public:
@@ -20,7 +24,7 @@ class Game {
  private:
   bool didPlayerWin();
   void askQuestion();
-  std::string currentCategory();
+  Category currentCategory();
 
   std::vector<std::string> players;
   int places[6];
