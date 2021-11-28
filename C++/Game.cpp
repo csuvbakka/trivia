@@ -43,7 +43,7 @@ bool Game::isPlayable()
   return (players_.size() >= 2);
 }
 
-void Game::roll(int roll)
+void Game::rollWithNextPlayer(int roll)
 {
   updateCurrentPlayer();
   std::cout << currentPlayer_->name << " is the current player\n";

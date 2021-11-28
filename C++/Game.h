@@ -26,7 +26,7 @@ class Game {
   static Game Create(std::vector<std::string> playerNames, QuestionPool questionPool);
   bool isPlayable();
 
-  void roll(int roll);
+  void rollWithNextPlayer(int roll);
   bool wasCorrectlyAnswered();
   bool wrongAnswer();
 

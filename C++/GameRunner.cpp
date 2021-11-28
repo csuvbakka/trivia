@@ -25,7 +25,7 @@ int main()
   auto aGame      = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
   bool notAWinner = true;
   do {
-    aGame.roll(rand() % 5 + 1);
+    aGame.rollWithNextPlayer(rand() % 5 + 1);
 
     if (rand() % 9 == 7) {
       notAWinner = aGame.wrongAnswer();
