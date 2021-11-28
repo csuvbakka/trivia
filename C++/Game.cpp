@@ -49,7 +49,7 @@ void Game::roll(int roll)
   movePlayer(roll);
   std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.place << "\n";
   std::cout << "The category is " << ToStringView(currentCategory()) << "\n";
-  askQuestion();
+  askQuestion(currentCategory());
 }
 
 void Game::movePlayer(int n_steps)
@@ -57,9 +57,9 @@ void Game::movePlayer(int n_steps)
   currentPlayer_->state.place = (currentPlayer_->state.place + n_steps) % 12;
 }
 
-void Game::askQuestion()
+void Game::askQuestion(Category category)
 {
-  auto& questionGroup = questionPool_[currentCategory()];
+  auto& questionGroup = questionPool_[category];
   std::cout << questionGroup.front() << "\n";
   questionGroup.pop_front();
 }
