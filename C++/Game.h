@@ -22,14 +22,22 @@ class Game {
   bool wrongAnswer();
 
  private:
+  struct PlayerState {
+    PlayerState(int place, int purse, bool inPenaltyBox)
+        : place(place), purse(purse), inPenaltyBox(inPenaltyBox)
+    {
+    }
+    int place;
+    int purse;
+    bool inPenaltyBox;
+  };
+
   bool didPlayerWin();
   void askQuestion();
   Category currentCategory();
 
   std::vector<std::string> players;
-  int places[6];
-  int purses[6];
-  bool inPenaltyBox[6];
+  std::vector<PlayerState> playerStates;
 
   std::list<std::string> popQuestions;
   std::list<std::string> scienceQuestions;

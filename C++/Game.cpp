@@ -15,7 +15,7 @@ constexpr std::string_view ToStringView(Category category)
   throw std::runtime_error("Unknown category.");
 }
 
-Game::Game() : places{}, purses{}, currentPlayer(0)
+Game::Game() : currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
     popQuestions.emplace_back("Pop Question " + std::to_string(i));
@@ -33,9 +33,7 @@ bool Game::isPlayable()
 bool Game::add(std::string playerName)
 {
   players.push_back(playerName);
-  places[players.size()]       = 0;
-  purses[players.size()]       = 0;
-  inPenaltyBox[players.size()] = false;
+  playerStates.emplace_back(0, 0, false);
 
   std::cout << playerName << " was added" << std::endl;
   std::cout << "They are player number " << players.size() << std::endl;
@@ -47,7 +45,7 @@ void Game::roll(int roll)
   std::cout << players[currentPlayer] << " is the current player" << std::endl;
   std::cout << "They have rolled a " << roll << std::endl;
 
-  if (inPenaltyBox[currentPlayer]) {
+  if (playerStates[currentPlayer].inPenaltyBox) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox = true;
       std::cout << players[currentPlayer] << " is getting out of the penalty box" << std::endl;
@@ -59,7 +57,7 @@ void Game::roll(int roll)
   }
 
   movePlayer(roll);
-  std::cout << players[currentPlayer] << "'s new location is " << places[currentPlayer]
+  std::cout << players[currentPlayer] << "'s new location is " << playerStates[currentPlayer].place
             << std::endl;
   std::cout << "The category is " << ToStringView(currentCategory()) << std::endl;
   askQuestion();
@@ -67,7 +65,7 @@ void Game::roll(int roll)
 
 void Game::movePlayer(int n_steps)
 {
-  places[currentPlayer] = (places[currentPlayer] + n_steps) % 12;
+  playerStates[currentPlayer].place = (playerStates[currentPlayer].place + n_steps) % 12;
 }
 
 void Game::askQuestion()
@@ -92,7 +90,7 @@ void Game::askQuestion()
 
 Category Game::currentCategory()
 {
-  switch (places[currentPlayer] % 4) {
+  switch (playerStates[currentPlayer].place % 4) {
     case 0: return Category::Pop;
     case 1: return Category::Science;
     case 2: return Category::Sports;
@@ -102,12 +100,12 @@ Category Game::currentCategory()
 
 bool Game::wasCorrectlyAnswered()
 {
-  if (inPenaltyBox[currentPlayer]) {
+  if (playerStates[currentPlayer].inPenaltyBox) {
     if (isGettingOutOfPenaltyBox) {
       std::cout << "Answer was correct!!!!" << std::endl;
-      purses[currentPlayer]++;
-      std::cout << players[currentPlayer] << " now has " << purses[currentPlayer] << " Gold Coins."
-                << std::endl;
+      playerStates[currentPlayer].purse++;
+      std::cout << players[currentPlayer] << " now has " << playerStates[currentPlayer].purse
+                << " Gold Coins." << std::endl;
 
       bool winner = didPlayerWin();
       makeNextPlayerTheCurrent();
@@ -120,9 +118,9 @@ bool Game::wasCorrectlyAnswered()
 
   } else {
     std::cout << "Answer was corrent!!!!" << std::endl;
-    purses[currentPlayer]++;
-    std::cout << players[currentPlayer] << " now has " << purses[currentPlayer] << " Gold Coins."
-              << std::endl;
+    playerStates[currentPlayer].purse++;
+    std::cout << players[currentPlayer] << " now has " << playerStates[currentPlayer].purse
+              << " Gold Coins." << std::endl;
 
     bool winner = didPlayerWin();
     makeNextPlayerTheCurrent();
@@ -140,7 +138,7 @@ bool Game::wrongAnswer()
 {
   std::cout << "Question was incorrectly answered" << std::endl;
   std::cout << players[currentPlayer] + " was sent to the penalty box" << std::endl;
-  inPenaltyBox[currentPlayer] = true;
+  playerStates[currentPlayer].inPenaltyBox = true;
 
   makeNextPlayerTheCurrent();
   return true;
@@ -148,5 +146,5 @@ bool Game::wrongAnswer()
 
 bool Game::didPlayerWin()
 {
-  return !(purses[currentPlayer] == 6);
+  return !(playerStates[currentPlayer].purse == 6);
 }
