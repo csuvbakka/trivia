@@ -112,15 +112,11 @@ bool Game::wasCorrectlyAnswered()
                 << std::endl;
 
       bool winner = didPlayerWin();
-      currentPlayer++;
-      if (currentPlayer == players.size())
-        currentPlayer = 0;
+      makeNextPlayerTheCurrent();
 
       return winner;
     } else {
-      currentPlayer++;
-      if (currentPlayer == players.size())
-        currentPlayer = 0;
+      makeNextPlayerTheCurrent();
       return true;
     }
 
@@ -131,12 +127,17 @@ bool Game::wasCorrectlyAnswered()
               << std::endl;
 
     bool winner = didPlayerWin();
-    currentPlayer++;
-    if (currentPlayer == players.size())
-      currentPlayer = 0;
+    makeNextPlayerTheCurrent();
 
     return winner;
   }
+}
+
+void Game::makeNextPlayerTheCurrent()
+{
+  currentPlayer++;
+  if (currentPlayer == players.size())
+    currentPlayer = 0;
 }
 
 bool Game::wrongAnswer()
@@ -145,9 +146,7 @@ bool Game::wrongAnswer()
   std::cout << players[currentPlayer] + " was sent to the penalty box" << std::endl;
   inPenaltyBox[currentPlayer] = true;
 
-  currentPlayer++;
-  if (currentPlayer == players.size())
-    currentPlayer = 0;
+  makeNextPlayerTheCurrent();
   return true;
 }
 

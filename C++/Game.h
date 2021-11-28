@@ -14,6 +14,7 @@ class Game {
   void roll(int roll);
   void movePlayer(int roll);
   bool wasCorrectlyAnswered();
+  void makeNextPlayerTheCurrent();
   bool wrongAnswer();
 
  private:
