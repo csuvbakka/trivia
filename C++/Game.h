@@ -49,7 +49,6 @@ class Game {
 
   Game(std::vector<Player> players, QuestionPool questionPool);
 
-  bool didPlayerWin();
   void askQuestion();
   Category currentCategory();
   void movePlayer(int n_steps);

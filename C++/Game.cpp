@@ -90,10 +90,10 @@ bool Game::wasCorrectlyAnswered()
   std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
             << " Gold Coins." << std::endl;
 
-  bool winner = didPlayerWin();
+  const bool didPlayerWin = players[currentPlayer].state.purse == 6;
   makeNextPlayerTheCurrent();
 
-  return !winner;
+  return !didPlayerWin;
 }
 
 void Game::makeNextPlayerTheCurrent()
@@ -109,9 +109,4 @@ bool Game::wrongAnswer()
 
   makeNextPlayerTheCurrent();
   return true;
-}
-
-bool Game::didPlayerWin()
-{
-  return players[currentPlayer].state.purse == 6;
 }
