@@ -54,9 +54,9 @@ void Game::roll(int roll)
   askQuestion();
 }
 
-void Game::movePlayer(int roll)
+void Game::movePlayer(int n_steps)
 {
-  places[currentPlayer] = (places[currentPlayer] + roll) % 12;
+  places[currentPlayer] = (places[currentPlayer] + n_steps) % 12;
 }
 
 void Game::askQuestion()
