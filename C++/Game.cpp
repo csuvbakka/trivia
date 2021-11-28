@@ -7,10 +7,10 @@
 Game::Game() : places{}, purses{}, currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
-    popQuestions.push_back("Pop Question " + std::to_string(i));
-    scienceQuestions.push_back("Science Question " + std::to_string(i));
-    sportsQuestions.push_back("Sports Question " + std::to_string(i));
-    rockQuestions.push_back("Rock Question " + std::to_string(i));
+    popQuestions.emplace_back("Pop Question " + std::to_string(i));
+    scienceQuestions.emplace_back("Science Question " + std::to_string(i));
+    sportsQuestions.emplace_back("Sports Question " + std::to_string(i));
+    rockQuestions.emplace_back("Rock Question " + std::to_string(i));
   }
 }
 
