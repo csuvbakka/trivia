@@ -5,7 +5,7 @@
 #include <sstream>
 
 Game::Game(std::vector<Player> players, QuestionPool questionPool)
-    : players(std::move(players)), questionPool(std::move(questionPool)), currentPlayer(0)
+    : players_(std::move(players)), questionPool_(std::move(questionPool)), currentPlayer_(0)
 {
 }
 
@@ -25,48 +25,49 @@ Game Game::Create(std::vector<std::string> playerNames, QuestionPool questionPoo
 
 bool Game::isPlayable()
 {
-  return (players.size() >= 2);
+  return (players_.size() >= 2);
 }
 
 void Game::roll(int roll)
 {
-  std::cout << players[currentPlayer].name << " is the current player" << std::endl;
+  std::cout << players_[currentPlayer_].name << " is the current player" << std::endl;
   std::cout << "They have rolled a " << roll << std::endl;
 
-  if (players[currentPlayer].state.inPenaltyBox) {
+  if (players_[currentPlayer_].state.inPenaltyBox) {
     if (roll % 2 != 0) {
-      isGettingOutOfPenaltyBox = true;
-      std::cout << players[currentPlayer].name << " is getting out of the penalty box" << std::endl;
+      isGettingOutOfPenaltyBox_ = true;
+      std::cout << players_[currentPlayer_].name << " is getting out of the penalty box"
+                << std::endl;
     } else {
-      isGettingOutOfPenaltyBox = false;
-      std::cout << players[currentPlayer].name << " is not getting out of the penalty box"
+      isGettingOutOfPenaltyBox_ = false;
+      std::cout << players_[currentPlayer_].name << " is not getting out of the penalty box"
                 << std::endl;
       return;
     }
   }
 
   movePlayer(roll);
-  std::cout << players[currentPlayer].name << "'s new location is "
-            << players[currentPlayer].state.place << std::endl;
+  std::cout << players_[currentPlayer_].name << "'s new location is "
+            << players_[currentPlayer_].state.place << std::endl;
   std::cout << "The category is " << ToStringView(currentCategory()) << std::endl;
   askQuestion();
 }
 
 void Game::movePlayer(int n_steps)
 {
-  players[currentPlayer].state.place = (players[currentPlayer].state.place + n_steps) % 12;
+  players_[currentPlayer_].state.place = (players_[currentPlayer_].state.place + n_steps) % 12;
 }
 
 void Game::askQuestion()
 {
-  auto& questionGroup = questionPool[currentCategory()];
+  auto& questionGroup = questionPool_[currentCategory()];
   std::cout << questionGroup.front() << std::endl;
   questionGroup.pop_front();
 }
 
 Category Game::currentCategory()
 {
-  switch (players[currentPlayer].state.place % 4) {
+  switch (players_[currentPlayer_].state.place % 4) {
     case 0: return Category::Pop;
     case 1: return Category::Science;
     case 2: return Category::Sports;
@@ -76,8 +77,8 @@ Category Game::currentCategory()
 
 bool Game::wasCorrectlyAnswered()
 {
-  if (players[currentPlayer].state.inPenaltyBox) {
-    if (isGettingOutOfPenaltyBox) {
+  if (players_[currentPlayer_].state.inPenaltyBox) {
+    if (isGettingOutOfPenaltyBox_) {
       std::cout << "Answer was correct!!!!" << std::endl;
     } else {
       makeNextPlayerTheCurrent();
@@ -86,11 +87,11 @@ bool Game::wasCorrectlyAnswered()
   } else {
     std::cout << "Answer was corrent!!!!" << std::endl;
   }
-  players[currentPlayer].state.purse++;
-  std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
+  players_[currentPlayer_].state.purse++;
+  std::cout << players_[currentPlayer_].name << " now has " << players_[currentPlayer_].state.purse
             << " Gold Coins." << std::endl;
 
-  const bool didPlayerWin = players[currentPlayer].state.purse == 6;
+  const bool didPlayerWin = players_[currentPlayer_].state.purse == 6;
   makeNextPlayerTheCurrent();
 
   return !didPlayerWin;
@@ -98,14 +99,14 @@ bool Game::wasCorrectlyAnswered()
 
 void Game::makeNextPlayerTheCurrent()
 {
-  currentPlayer = (currentPlayer + 1) % players.size();
+  currentPlayer_ = (currentPlayer_ + 1) % players_.size();
 }
 
 bool Game::wrongAnswer()
 {
   std::cout << "Question was incorrectly answered" << std::endl;
-  std::cout << players[currentPlayer].name + " was sent to the penalty box" << std::endl;
-  players[currentPlayer].state.inPenaltyBox = true;
+  std::cout << players_[currentPlayer_].name + " was sent to the penalty box" << std::endl;
+  players_[currentPlayer_].state.inPenaltyBox = true;
 
   makeNextPlayerTheCurrent();
   return true;

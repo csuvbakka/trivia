@@ -54,11 +54,11 @@ class Game {
   void movePlayer(int n_steps);
   void makeNextPlayerTheCurrent();
 
-  std::vector<Player> players;
-  QuestionPool questionPool;
+  std::vector<Player> players_;
+  QuestionPool questionPool_;
 
-  unsigned int currentPlayer;
-  bool isGettingOutOfPenaltyBox;
+  unsigned int currentPlayer_;
+  bool isGettingOutOfPenaltyBox_;
 };
 
 #endif /* GAME_H_ */
