@@ -20,7 +20,7 @@ Category categoryForField(int field)
 Game::Game(std::vector<Player> players, QuestionPool questionPool)
     : players_(std::move(players))
     , questionPool_(std::move(questionPool))
-    , currentPlayer_(players_.begin())
+    , currentPlayer_(std::prev(players_.begin()))
 {
 }
 
@@ -45,6 +45,7 @@ bool Game::isPlayable()
 
 void Game::roll(int roll)
 {
+  updateCurrentPlayer();
   std::cout << currentPlayer_->name << " is the current player\n";
   std::cout << "They have rolled a " << roll << "\n";
 
@@ -92,7 +93,6 @@ bool Game::wasCorrectlyAnswered()
     if (isGettingOutOfPenaltyBox_) {
       std::cout << "Answer was correct!!!!\n";
     } else {
-      makeNextPlayerTheCurrent();
       return true;
     }
   } else {
@@ -103,12 +103,11 @@ bool Game::wasCorrectlyAnswered()
             << " Gold Coins.\n";
 
   const bool didPlayerWin = currentPlayer_->state.coins == 6;
-  makeNextPlayerTheCurrent();
 
   return !didPlayerWin;
 }
 
-void Game::makeNextPlayerTheCurrent()
+void Game::updateCurrentPlayer()
 {
   ++currentPlayer_;
   if (currentPlayer_ == players_.end())
@@ -121,6 +120,5 @@ bool Game::wrongAnswer()
   std::cout << currentPlayer_->name + " was sent to the penalty box\n";
   currentPlayer_->state.inPenaltyBox = true;
 
-  makeNextPlayerTheCurrent();
   return true;
 }

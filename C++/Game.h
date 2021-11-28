@@ -51,7 +51,7 @@ class Game {
 
   std::string nextQuestion(Category category);
   Category currentCategory();
-  void makeNextPlayerTheCurrent();
+  void updateCurrentPlayer();
 
   std::vector<Player> players_;
   QuestionPool questionPool_;
