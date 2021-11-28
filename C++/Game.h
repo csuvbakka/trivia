@@ -12,6 +12,7 @@ class Game {
   bool add(std::string playerName);
 
   void roll(int roll);
+  void movePlayer(int roll);
   bool wasCorrectlyAnswered();
   bool wrongAnswer();
 
