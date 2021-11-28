@@ -3,8 +3,6 @@
 
 #include <string>
 
-static bool notAWinner;
-
 Game::QuestionPool generateQuestions()
 {
   Game::QuestionPool questionPool;
@@ -24,8 +22,8 @@ Game::QuestionPool generateQuestions()
 int main()
 {
   srand(time(NULL));
-  auto aGame = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
-
+  auto aGame      = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
+  bool notAWinner = true;
   do {
     aGame.roll(rand() % 5 + 1);
 
