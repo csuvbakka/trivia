@@ -57,7 +57,7 @@ class Game {
   std::vector<Player> players_;
   QuestionPool questionPool_;
 
-  unsigned int currentPlayer_;
+  std::vector<Player>::iterator currentPlayer_;
   bool isGettingOutOfPenaltyBox_;
 };
 
