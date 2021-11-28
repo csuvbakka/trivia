@@ -6,11 +6,7 @@ static bool notAWinner;
 int main()
 {
   srand(time(NULL));
-  Game aGame;
-
-  aGame.add("Chet");
-  aGame.add("Pat");
-  aGame.add("Sue");
+  auto aGame = Game::Create({"Chet", "Pat", "Sue"});
 
   do {
     aGame.roll(rand() % 5 + 1);

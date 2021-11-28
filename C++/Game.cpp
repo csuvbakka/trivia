@@ -15,7 +15,7 @@ constexpr std::string_view ToStringView(Category category)
   throw std::runtime_error("Unknown category.");
 }
 
-Game::Game() : currentPlayer(0)
+Game::Game(std::vector<Player> players) : players(std::move(players)), currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
     questions[Category::Pop].emplace_back("Pop Question " + std::to_string(i));
@@ -25,18 +25,23 @@ Game::Game() : currentPlayer(0)
   }
 }
 
+Game Game::Create(std::vector<std::string> playerNames)
+{
+  std::vector<Player> players;
+  players.reserve(playerNames.size());
+
+  for (auto&& name : playerNames) {
+    players.emplace_back(std::move(name), PlayerState{0, 0, false});
+    std::cout << players.back().name << " was added" << std::endl;
+    std::cout << "They are player number " << players.size() << std::endl;
+  }
+
+  return Game(std::move(players));
+}
+
 bool Game::isPlayable()
 {
   return (players.size() >= 2);
-}
-
-bool Game::add(std::string playerName)
-{
-  players.emplace_back(std::move(playerName), PlayerState{0, 0, false});
-
-  std::cout << players.back().name << " was added" << std::endl;
-  std::cout << "They are player number " << players.size() << std::endl;
-  return true;
 }
 
 void Game::roll(int roll)

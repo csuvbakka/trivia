@@ -12,15 +12,15 @@ constexpr std::string_view ToStringView(Category category);
 
 class Game {
  public:
-  Game();
+  static Game Create(std::vector<std::string> playerNames);
   bool isPlayable();
-  bool add(std::string playerName);
 
   void roll(int roll);
   bool wasCorrectlyAnswered();
   bool wrongAnswer();
 
  private:
+
   struct PlayerState {
     PlayerState(int place, int purse, bool inPenaltyBox)
         : place(place), purse(purse), inPenaltyBox(inPenaltyBox)
@@ -36,6 +36,8 @@ class Game {
     std::string name;
     PlayerState state;
   };
+
+  Game(std::vector<Player> players);
 
   bool didPlayerWin();
   void askQuestion();
