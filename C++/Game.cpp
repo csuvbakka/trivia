@@ -135,9 +135,7 @@ bool Game::wasCorrectlyAnswered()
 
 void Game::makeNextPlayerTheCurrent()
 {
-  currentPlayer++;
-  if (currentPlayer == players.size())
-    currentPlayer = 0;
+  currentPlayer = (currentPlayer + 1) % players.size();
 }
 
 bool Game::wrongAnswer()
