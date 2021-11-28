@@ -1,24 +1,23 @@
 #include <iostream>
 #include <list>
 #include <vector>
-using namespace std;
 
 #ifndef GAME_H_
 #define GAME_H_
 
 class Game {
  private:
-  vector<string> players;
+  std::vector<std::string> players;
 
   int places[6];
   int purses[6];
 
   bool inPenaltyBox[6];
 
-  list<string> popQuestions;
-  list<string> scienceQuestions;
-  list<string> sportsQuestions;
-  list<string> rockQuestions;
+  std::list<std::string> popQuestions;
+  std::list<std::string> scienceQuestions;
+  std::list<std::string> sportsQuestions;
+  std::list<std::string> rockQuestions;
 
   unsigned int currentPlayer;
   bool isGettingOutOfPenaltyBox;
@@ -26,14 +25,14 @@ class Game {
  public:
   Game();
   bool isPlayable();
-  bool add(string playerName);
+  bool add(std::string playerName);
 
   int howManyPlayers();
   void roll(int roll);
 
  private:
   void askQuestion();
-  string currentCategory();
+  std::string currentCategory();
 
  public:
   bool wasCorrectlyAnswered();
