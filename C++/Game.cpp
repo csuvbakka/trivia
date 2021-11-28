@@ -7,22 +7,10 @@
 Game::Game() : places{}, purses{}, currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
-    std::ostringstream oss;
-    oss << "Pop Question " << i;
-
-    popQuestions.push_back(oss.str());
-
-    char str[255];
-    sprintf(str, "Science Question %d", i);
-    scienceQuestions.push_back(str);
-
-    char str1[255];
-    sprintf(str1, "Sports Question %d", i);
-    sportsQuestions.push_back(str1);
-
-    char indexStr[127];
-    sprintf(indexStr, "Rock Question %d", i);
-    rockQuestions.push_back(indexStr);
+    popQuestions.push_back("Pop Question " + std::to_string(i));
+    scienceQuestions.push_back("Science Question " + std::to_string(i));
+    sportsQuestions.push_back("Sports Question " + std::to_string(i));
+    rockQuestions.push_back("Rock Question " + std::to_string(i));
   }
 }
 
