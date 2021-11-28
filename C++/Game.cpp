@@ -59,11 +59,11 @@ void Game::roll(int roll)
     }
   }
 
-  currentPlayer_->state.place = (currentPlayer_->state.place + roll) % 12;
-  const auto category         = categoryForField(currentPlayer_->state.place);
+  currentPlayer_->state.field = (currentPlayer_->state.field + roll) % 12;
+  const auto category         = categoryForField(currentPlayer_->state.field);
   const auto question         = nextQuestion(category);
 
-  std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.place << "\n";
+  std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.field << "\n";
   std::cout << "The category is " << ToStringView(category) << "\n";
   std::cout << question << "\n";
 }
@@ -78,7 +78,7 @@ std::string Game::nextQuestion(Category category)
 
 Category Game::currentCategory()
 {
-  switch (currentPlayer_->state.place % 4) {
+  switch (currentPlayer_->state.field % 4) {
     case 0: return Category::Pop;
     case 1: return Category::Science;
     case 2: return Category::Sports;
