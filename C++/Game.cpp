@@ -7,7 +7,7 @@
 Game::Game() : places{}, purses{}, currentPlayer(0)
 {
   for (int i = 0; i < 50; i++) {
-    std::ostringstream oss(std::ostringstream::out);
+    std::ostringstream oss;
     oss << "Pop Question " << i;
 
     popQuestions.push_back(oss.str());
