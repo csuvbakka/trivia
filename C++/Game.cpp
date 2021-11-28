@@ -92,25 +92,12 @@ void Game::askQuestion()
 
 Category Game::currentCategory()
 {
-  if (places[currentPlayer] == 0)
-    return Category::Pop;
-  if (places[currentPlayer] == 4)
-    return Category::Pop;
-  if (places[currentPlayer] == 8)
-    return Category::Pop;
-  if (places[currentPlayer] == 1)
-    return Category::Science;
-  if (places[currentPlayer] == 5)
-    return Category::Science;
-  if (places[currentPlayer] == 9)
-    return Category::Science;
-  if (places[currentPlayer] == 2)
-    return Category::Sports;
-  if (places[currentPlayer] == 6)
-    return Category::Sports;
-  if (places[currentPlayer] == 10)
-    return Category::Sports;
-  return Category::Rock;
+  switch (places[currentPlayer] % 4) {
+    case 0: return Category::Pop;
+    case 1: return Category::Science;
+    case 2: return Category::Sports;
+    default: return Category::Rock;
+  }
 }
 
 bool Game::wasCorrectlyAnswered()
