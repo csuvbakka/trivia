@@ -39,25 +39,19 @@ void Game::roll(int roll)
   if (inPenaltyBox[currentPlayer]) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox = true;
-
       std::cout << players[currentPlayer] << " is getting out of the penalty box" << std::endl;
-      movePlayer(roll);
-      std::cout << players[currentPlayer] << "'s new location is " << places[currentPlayer]
-                << std::endl;
-      std::cout << "The category is " << currentCategory() << std::endl;
-      askQuestion();
     } else {
-      std::cout << players[currentPlayer] << " is not getting out of the penalty box" << std::endl;
       isGettingOutOfPenaltyBox = false;
+      std::cout << players[currentPlayer] << " is not getting out of the penalty box" << std::endl;
+      return;
     }
-
-  } else {
-    movePlayer(roll);
-    std::cout << players[currentPlayer] << "'s new location is " << places[currentPlayer]
-              << std::endl;
-    std::cout << "The category is " << currentCategory() << std::endl;
-    askQuestion();
   }
+
+  movePlayer(roll);
+  std::cout << players[currentPlayer] << "'s new location is " << places[currentPlayer]
+            << std::endl;
+  std::cout << "The category is " << currentCategory() << std::endl;
+  askQuestion();
 }
 
 void Game::movePlayer(int roll)
