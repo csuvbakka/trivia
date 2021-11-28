@@ -103,30 +103,21 @@ bool Game::wasCorrectlyAnswered()
   if (players[currentPlayer].state.inPenaltyBox) {
     if (isGettingOutOfPenaltyBox) {
       std::cout << "Answer was correct!!!!" << std::endl;
-      players[currentPlayer].state.purse++;
-      std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
-                << " Gold Coins." << std::endl;
-
-      bool winner = didPlayerWin();
-      makeNextPlayerTheCurrent();
-
-      return winner;
     } else {
       makeNextPlayerTheCurrent();
       return true;
     }
-
   } else {
     std::cout << "Answer was corrent!!!!" << std::endl;
-    players[currentPlayer].state.purse++;
-    std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
-              << " Gold Coins." << std::endl;
-
-    bool winner = didPlayerWin();
-    makeNextPlayerTheCurrent();
-
-    return winner;
   }
+  players[currentPlayer].state.purse++;
+  std::cout << players[currentPlayer].name << " now has " << players[currentPlayer].state.purse
+            << " Gold Coins." << std::endl;
+
+  bool winner = didPlayerWin();
+  makeNextPlayerTheCurrent();
+
+  return winner;
 }
 
 void Game::makeNextPlayerTheCurrent()
