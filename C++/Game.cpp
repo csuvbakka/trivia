@@ -18,8 +18,8 @@ Game Game::Create(std::vector<std::string> playerNames, QuestionPool questionPoo
 
   for (auto&& name : playerNames) {
     players.emplace_back(std::move(name), PlayerState{0, 0, false});
-    std::cout << players.back().name << " was added" << std::endl;
-    std::cout << "They are player number " << players.size() << std::endl;
+    std::cout << players.back().name << " was added\n";
+    std::cout << "They are player number " << players.size() << "\n";
   }
 
   return Game(std::move(players), std::move(questionPool));
@@ -32,24 +32,23 @@ bool Game::isPlayable()
 
 void Game::roll(int roll)
 {
-  std::cout << currentPlayer_->name << " is the current player" << std::endl;
-  std::cout << "They have rolled a " << roll << std::endl;
+  std::cout << currentPlayer_->name << " is the current player\n";
+  std::cout << "They have rolled a " << roll << "\n";
 
   if (currentPlayer_->state.inPenaltyBox) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox_ = true;
-      std::cout << currentPlayer_->name << " is getting out of the penalty box" << std::endl;
+      std::cout << currentPlayer_->name << " is getting out of the penalty box\n";
     } else {
       isGettingOutOfPenaltyBox_ = false;
-      std::cout << currentPlayer_->name << " is not getting out of the penalty box" << std::endl;
+      std::cout << currentPlayer_->name << " is not getting out of the penalty box\n";
       return;
     }
   }
 
   movePlayer(roll);
-  std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.place
-            << std::endl;
-  std::cout << "The category is " << ToStringView(currentCategory()) << std::endl;
+  std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.place << "\n";
+  std::cout << "The category is " << ToStringView(currentCategory()) << "\n";
   askQuestion();
 }
 
@@ -61,7 +60,7 @@ void Game::movePlayer(int n_steps)
 void Game::askQuestion()
 {
   auto& questionGroup = questionPool_[currentCategory()];
-  std::cout << questionGroup.front() << std::endl;
+  std::cout << questionGroup.front() << "\n";
   questionGroup.pop_front();
 }
 
@@ -79,17 +78,17 @@ bool Game::wasCorrectlyAnswered()
 {
   if (currentPlayer_->state.inPenaltyBox) {
     if (isGettingOutOfPenaltyBox_) {
-      std::cout << "Answer was correct!!!!" << std::endl;
+      std::cout << "Answer was correct!!!!\n";
     } else {
       makeNextPlayerTheCurrent();
       return true;
     }
   } else {
-    std::cout << "Answer was corrent!!!!" << std::endl;
+    std::cout << "Answer was corrent!!!!\n";
   }
   currentPlayer_->state.purse++;
-  std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.purse << " Gold Coins."
-            << std::endl;
+  std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.purse
+            << " Gold Coins.\n";
 
   const bool didPlayerWin = currentPlayer_->state.purse == 6;
   makeNextPlayerTheCurrent();
@@ -106,8 +105,8 @@ void Game::makeNextPlayerTheCurrent()
 
 bool Game::wrongAnswer()
 {
-  std::cout << "Question was incorrectly answered" << std::endl;
-  std::cout << currentPlayer_->name + " was sent to the penalty box" << std::endl;
+  std::cout << "Question was incorrectly answered\n";
+  std::cout << currentPlayer_->name + " was sent to the penalty box\n";
   currentPlayer_->state.inPenaltyBox = true;
 
   makeNextPlayerTheCurrent();
