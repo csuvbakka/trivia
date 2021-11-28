@@ -93,7 +93,7 @@ bool Game::wasCorrectlyAnswered()
   bool winner = didPlayerWin();
   makeNextPlayerTheCurrent();
 
-  return winner;
+  return !winner;
 }
 
 void Game::makeNextPlayerTheCurrent()
@@ -113,5 +113,5 @@ bool Game::wrongAnswer()
 
 bool Game::didPlayerWin()
 {
-  return !(players[currentPlayer].state.purse == 6);
+  return players[currentPlayer].state.purse == 6;
 }
