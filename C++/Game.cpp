@@ -42,14 +42,12 @@ void Game::run()
 {
   while (true) {
     updateCurrentPlayer();
-    if (movePlayer(rand() % 5 + 1))
-      readQuestion();
-
-    if (rand() % 9 == 7) {
-      evaluateAnswer(false);
-    } else {
-      evaluateAnswer(true);
+    if (movePlayer(rand() % 5 + 1)) {
+      auto question = readQuestion();
+      askQuestion(std::move(question));
     }
+
+    evaluateAnswer(Answer{});
     if (didPlayerWin(*currentPlayer_))
       break;
   }
@@ -81,13 +79,19 @@ std::optional<int> Game::movePlayer(int roll)
   return currentPlayer_->state.field;
 }
 
-void Game::readQuestion()
+Question Game::readQuestion()
 {
   const auto category = categoryForField(currentPlayer_->state.field);
   const auto question = nextQuestion(category);
 
-  std::cout << "The category is " << ToStringView(category) << "\n";
-  std::cout << question << "\n";
+  return {question, category};
+}
+
+Answer Game::askQuestion(Question question)
+{
+  std::cout << "The category is " << ToStringView(question.category) << "\n";
+  std::cout << question.text << "\n";
+  return {};
 }
 
 std::string Game::nextQuestion(Category category)
@@ -110,8 +114,9 @@ bool Game::didPlayerWin(const Player& player) const
   return player.state.coins == 6;
 }
 
-void Game::evaluateAnswer(bool isCorrect)
+void Game::evaluateAnswer(Answer /*answer*/)
 {
+  const bool isCorrect = rand() % 9 != 7;
   if (!isCorrect) {
     std::cout << "Question was incorrectly answered\n";
     std::cout << currentPlayer_->name + " was sent to the penalty box\n";

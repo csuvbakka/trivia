@@ -1,9 +1,9 @@
 #include <iostream>
 #include <list>
+#include <optional>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include <optional>
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -19,6 +19,13 @@ constexpr std::string_view ToStringView(Category category)
   }
   throw std::runtime_error("Unknown category.");
 }
+
+struct Question {
+  std::string text;
+  Category category;
+};
+struct Answer {
+};
 
 class Game {
  public:
@@ -49,8 +56,9 @@ class Game {
   Game(std::vector<Player> players, QuestionPool questionPool);
 
   std::optional<int> movePlayer(int roll);
-  void readQuestion();
-  void evaluateAnswer(bool isCorrect);
+  Question readQuestion();
+  Answer askQuestion(Question question);
+  void evaluateAnswer(Answer answer);
 
   std::string nextQuestion(Category category);
   void updateCurrentPlayer();
