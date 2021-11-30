@@ -38,6 +38,20 @@ Game Game::Create(std::vector<std::string> playerNames, QuestionPool questionPoo
   return Game(std::move(players), std::move(questionPool));
 }
 
+void Game::run()
+{
+  bool notAWinner = true;
+  do {
+    rollWithNextPlayer(rand() % 5 + 1);
+
+    if (rand() % 9 == 7) {
+      notAWinner = answer(false);
+    } else {
+      notAWinner = answer(true);
+    }
+  } while (notAWinner);
+}
+
 bool Game::isPlayable()
 {
   return (players_.size() >= 2);
@@ -87,27 +101,27 @@ void Game::updateCurrentPlayer()
 bool Game::answer(bool isCorrect)
 {
   if (!isCorrect) {
-  std::cout << "Question was incorrectly answered\n";
-  std::cout << currentPlayer_->name + " was sent to the penalty box\n";
-  currentPlayer_->state.inPenaltyBox = true;
+    std::cout << "Question was incorrectly answered\n";
+    std::cout << currentPlayer_->name + " was sent to the penalty box\n";
+    currentPlayer_->state.inPenaltyBox = true;
 
-  return true;
+    return true;
   } else {
-  if (currentPlayer_->state.inPenaltyBox) {
-    if (isGettingOutOfPenaltyBox_) {
-      std::cout << "Answer was correct!!!!\n";
+    if (currentPlayer_->state.inPenaltyBox) {
+      if (isGettingOutOfPenaltyBox_) {
+        std::cout << "Answer was correct!!!!\n";
+      } else {
+        return true;
+      }
     } else {
-      return true;
+      std::cout << "Answer was corrent!!!!\n";
     }
-  } else {
-    std::cout << "Answer was corrent!!!!\n";
-  }
-  currentPlayer_->state.coins++;
-  std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.coins
-            << " Gold Coins.\n";
+    currentPlayer_->state.coins++;
+    std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.coins
+              << " Gold Coins.\n";
 
-  const bool didPlayerWin = currentPlayer_->state.coins == 6;
+    const bool didPlayerWin = currentPlayer_->state.coins == 6;
 
-  return !didPlayerWin;
+    return !didPlayerWin;
   }
 }

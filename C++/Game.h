@@ -26,8 +26,7 @@ class Game {
   static Game Create(std::vector<std::string> playerNames, QuestionPool questionPool);
   bool isPlayable();
 
-  void rollWithNextPlayer(int roll);
-  bool answer(bool isCorrect);
+  void run();
 
  private:
   struct PlayerState {
@@ -47,6 +46,9 @@ class Game {
   };
 
   Game(std::vector<Player> players, QuestionPool questionPool);
+
+  void rollWithNextPlayer(int roll);
+  bool answer(bool isCorrect);
 
   std::string nextQuestion(Category category);
   void updateCurrentPlayer();

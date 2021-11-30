@@ -22,15 +22,6 @@ Game::QuestionPool generateQuestions()
 int main()
 {
   srand(time(NULL));
-  auto aGame      = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
-  bool notAWinner = true;
-  do {
-    aGame.rollWithNextPlayer(rand() % 5 + 1);
-
-    if (rand() % 9 == 7) {
-      notAWinner = aGame.answer(false);
-    } else {
-      notAWinner = aGame.answer(true);
-    }
-  } while (notAWinner);
+  auto aGame = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
+  aGame.run();
 }
