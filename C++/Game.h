@@ -50,10 +50,12 @@ class Game {
 
   std::optional<int> movePlayer(int roll);
   void readQuestion();
-  bool evaluateAnswer(bool isCorrect);
+  void evaluateAnswer(bool isCorrect);
 
   std::string nextQuestion(Category category);
   void updateCurrentPlayer();
+
+  bool didPlayerWin(const Player& player) const;
 
   std::vector<Player> players_;
   QuestionPool questionPool_;
