@@ -50,7 +50,7 @@ class Game {
 
   std::optional<int> movePlayer(int roll);
   void readQuestion();
-  bool answer(bool isCorrect);
+  bool evaluateAnswer(bool isCorrect);
 
   std::string nextQuestion(Category category);
   void updateCurrentPlayer();

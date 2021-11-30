@@ -47,9 +47,9 @@ void Game::run()
       readQuestion();
 
     if (rand() % 9 == 7) {
-      notAWinner = answer(false);
+      notAWinner = evaluateAnswer(false);
     } else {
-      notAWinner = answer(true);
+      notAWinner = evaluateAnswer(true);
     }
   } while (notAWinner);
 }
@@ -104,7 +104,7 @@ void Game::updateCurrentPlayer()
     currentPlayer_ = players_.begin();
 }
 
-bool Game::answer(bool isCorrect)
+bool Game::evaluateAnswer(bool isCorrect)
 {
   if (!isCorrect) {
     std::cout << "Question was incorrectly answered\n";
