@@ -43,7 +43,8 @@ void Game::run()
   bool notAWinner = true;
   do {
     updateCurrentPlayer();
-    rollWithNextPlayer(rand() % 5 + 1);
+    if (rollWithNextPlayer(rand() % 5 + 1))
+      readQuestion();
 
     if (rand() % 9 == 7) {
       notAWinner = answer(false);
@@ -58,7 +59,7 @@ bool Game::isPlayable()
   return (players_.size() >= 2);
 }
 
-void Game::rollWithNextPlayer(int roll)
+std::optional<int> Game::rollWithNextPlayer(int roll)
 {
   std::cout << currentPlayer_->name << " is the current player\n";
   std::cout << "They have rolled a " << roll << "\n";
@@ -70,15 +71,20 @@ void Game::rollWithNextPlayer(int roll)
     } else {
       isGettingOutOfPenaltyBox_ = false;
       std::cout << currentPlayer_->name << " is not getting out of the penalty box\n";
-      return;
+      return std::nullopt;
     }
   }
 
   currentPlayer_->state.field = (currentPlayer_->state.field + roll) % 12;
-  const auto category         = categoryForField(currentPlayer_->state.field);
-  const auto question         = nextQuestion(category);
-
   std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.field << "\n";
+  return currentPlayer_->state.field;
+}
+
+void Game::readQuestion()
+{
+  const auto category = categoryForField(currentPlayer_->state.field);
+  const auto question = nextQuestion(category);
+
   std::cout << "The category is " << ToStringView(category) << "\n";
   std::cout << question << "\n";
 }

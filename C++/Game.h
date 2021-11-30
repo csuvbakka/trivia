@@ -3,6 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #ifndef GAME_H_
 #define GAME_H_
@@ -47,7 +48,8 @@ class Game {
 
   Game(std::vector<Player> players, QuestionPool questionPool);
 
-  void rollWithNextPlayer(int roll);
+  std::optional<int> rollWithNextPlayer(int roll);
+  void readQuestion();
   bool answer(bool isCorrect);
 
   std::string nextQuestion(Category category);
