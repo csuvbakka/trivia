@@ -18,7 +18,7 @@ Category categoryForField(int field)
 }  // namespace
 
 TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool)
-    : players_(std::move(players)), questionPool_(std::move(questionPool)), currentPlayerId_(0)
+    : Game(players.size()), players_(std::move(players)), questionPool_(std::move(questionPool))
 {
 }
 
@@ -36,30 +36,14 @@ TriviaGame TriviaGame::Create(std::vector<std::string> playerNames, QuestionPool
   return TriviaGame(std::move(players), std::move(questionPool));
 }
 
-void TriviaGame::run()
-{
-  currentPlayerId_ = -1;
-  while (true) {
-    updateCurrentPlayer();
-    if (const auto newLocation = movePlayer()) {
-      auto question = readQuestion(*newLocation);
-      askQuestion(std::move(question));
-    }
-
-    evaluateAnswer(Answer{});
-    if (didPlayerWin(currentPlayerId_))
-      break;
-  }
-}
-
 bool TriviaGame::isPlayable()
 {
   return (players_.size() >= 2);
 }
 
-std::optional<int> TriviaGame::movePlayer()
+std::optional<int> TriviaGame::movePlayer(int playerId)
 {
-  auto& currentPlayer = players_[currentPlayerId_];
+  auto& currentPlayer = players_[playerId];
   const int roll      = rand() % 5 + 1;
   std::cout << currentPlayer.name << " is the current player\n";
   std::cout << "They have rolled a " << roll << "\n";
@@ -103,21 +87,14 @@ std::string TriviaGame::nextQuestion(Category category)
   return question;
 }
 
-void TriviaGame::updateCurrentPlayer()
-{
-  ++currentPlayerId_;
-  if (currentPlayerId_ == static_cast<int>(players_.size()))
-    currentPlayerId_ = 0;
-}
-
 bool TriviaGame::didPlayerWin(int playerId) const
 {
   return players_[playerId].state.coins == 6;
 }
 
-void TriviaGame::evaluateAnswer(Answer /*answer*/)
+void TriviaGame::evaluateAnswer(int playerId, Answer /*answer*/)
 {
-  auto& currentPlayer  = players_[currentPlayerId_];
+  auto& currentPlayer  = players_[playerId];
   const bool isCorrect = rand() % 9 != 7;
   if (!isCorrect) {
     std::cout << "Question was incorrectly answered\n";
@@ -137,4 +114,27 @@ void TriviaGame::evaluateAnswer(Answer /*answer*/)
     currentPlayer.state.coins++;
     std::cout << currentPlayer.name << " now has " << currentPlayer.state.coins << " Gold Coins.\n";
   }
+}
+
+Game::Game(int nPlayers) : nPlayers_(nPlayers) {}
+
+void Game::run()
+{
+  int currentPlayerId = -1;
+  while (true) {
+    currentPlayerId = getNextPlayerId(currentPlayerId);
+    if (const auto newLocation = movePlayer(currentPlayerId)) {
+      auto question = readQuestion(*newLocation);
+      askQuestion(std::move(question));
+    }
+
+    evaluateAnswer(currentPlayerId, Answer{});
+    if (didPlayerWin(currentPlayerId))
+      break;
+  }
+}
+
+int Game::getNextPlayerId(int currentPlayerId) const
+{
+  return (currentPlayerId + 1) % nPlayers_;
 }

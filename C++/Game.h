@@ -29,12 +29,21 @@ struct Answer {
 
 class Game {
  public:
-  virtual ~Game()                               = default;
-  virtual std::optional<int> movePlayer()       = 0;
-  virtual Question readQuestion(int location)   = 0;
-  virtual Answer askQuestion(Question question) = 0;
-  virtual void evaluateAnswer(Answer answer)    = 0;
-  virtual bool didPlayerWin(int playerId) const = 0;
+  Game(int nPlayers);
+  virtual ~Game() = default;
+
+  void run();
+
+ private:
+  int getNextPlayerId(int currentPlayerId) const;
+
+  virtual std::optional<int> movePlayer(int playerId)      = 0;
+  virtual Question readQuestion(int location)              = 0;
+  virtual Answer askQuestion(Question question)            = 0;
+  virtual void evaluateAnswer(int playerId, Answer answer) = 0;
+  virtual bool didPlayerWin(int playerId) const            = 0;
+
+  int nPlayers_;
 };
 
 class TriviaGame : public Game {
@@ -43,8 +52,6 @@ class TriviaGame : public Game {
 
   static TriviaGame Create(std::vector<std::string> playerNames, QuestionPool questionPool);
   bool isPlayable();
-
-  void run();
 
  private:
   struct PlayerState {
@@ -65,20 +72,18 @@ class TriviaGame : public Game {
 
   TriviaGame(std::vector<Player> players, QuestionPool questionPool);
 
-  virtual std::optional<int> movePlayer() override;
+  virtual std::optional<int> movePlayer(int playerId) override;
   virtual Question readQuestion(int location) override;
   virtual Answer askQuestion(Question question) override;
-  virtual void evaluateAnswer(Answer answer) override;
+  virtual void evaluateAnswer(int playerId, Answer answer) override;
 
   std::string nextQuestion(Category category);
-  void updateCurrentPlayer();
 
   virtual bool didPlayerWin(int playerId) const override;
 
   std::vector<Player> players_;
   QuestionPool questionPool_;
 
-  int currentPlayerId_;
   bool isGettingOutOfPenaltyBox_;
 };
 
