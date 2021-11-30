@@ -43,7 +43,7 @@ void Game::run()
   bool notAWinner = true;
   do {
     updateCurrentPlayer();
-    if (rollWithNextPlayer(rand() % 5 + 1))
+    if (movePlayer(rand() % 5 + 1))
       readQuestion();
 
     if (rand() % 9 == 7) {
@@ -59,7 +59,7 @@ bool Game::isPlayable()
   return (players_.size() >= 2);
 }
 
-std::optional<int> Game::rollWithNextPlayer(int roll)
+std::optional<int> Game::movePlayer(int roll)
 {
   std::cout << currentPlayer_->name << " is the current player\n";
   std::cout << "They have rolled a " << roll << "\n";

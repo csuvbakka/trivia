@@ -48,7 +48,7 @@ class Game {
 
   Game(std::vector<Player> players, QuestionPool questionPool);
 
-  std::optional<int> rollWithNextPlayer(int roll);
+  std::optional<int> movePlayer(int roll);
   void readQuestion();
   bool answer(bool isCorrect);
 
