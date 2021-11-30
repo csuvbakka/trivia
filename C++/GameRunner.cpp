@@ -3,9 +3,9 @@
 
 #include <string>
 
-Game::QuestionPool generateQuestions()
+TriviaGame::QuestionPool generateQuestions()
 {
-  Game::QuestionPool questionPool;
+  TriviaGame::QuestionPool questionPool;
   const auto generateQuestion = [&questionPool](Category category, int index) {
     questionPool[category].emplace_back(std::string(ToStringView(category)) + " Question "
                                         + std::to_string(index));
@@ -22,6 +22,6 @@ Game::QuestionPool generateQuestions()
 int main()
 {
   srand(time(NULL));
-  auto aGame = Game::Create({"Chet", "Pat", "Sue"}, generateQuestions());
+  auto aGame = TriviaGame::Create({"Chet", "Pat", "Sue"}, generateQuestions());
   aGame.run();
 }

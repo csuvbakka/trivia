@@ -17,14 +17,12 @@ Category categoryForField(int field)
 }
 }  // namespace
 
-Game::Game(std::vector<Player> players, QuestionPool questionPool)
-    : players_(std::move(players))
-    , questionPool_(std::move(questionPool))
-    , currentPlayer_(std::prev(players_.begin()))
+TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool)
+    : players_(std::move(players)), questionPool_(std::move(questionPool)), currentPlayerId_(0)
 {
 }
 
-Game Game::Create(std::vector<std::string> playerNames, QuestionPool questionPool)
+TriviaGame TriviaGame::Create(std::vector<std::string> playerNames, QuestionPool questionPool)
 {
   std::vector<Player> players;
   players.reserve(playerNames.size());
@@ -35,66 +33,69 @@ Game Game::Create(std::vector<std::string> playerNames, QuestionPool questionPoo
     std::cout << "They are player number " << players.size() << "\n";
   }
 
-  return Game(std::move(players), std::move(questionPool));
+  return TriviaGame(std::move(players), std::move(questionPool));
 }
 
-void Game::run()
+void TriviaGame::run()
 {
+  currentPlayerId_ = -1;
   while (true) {
     updateCurrentPlayer();
-    if (movePlayer(rand() % 5 + 1)) {
-      auto question = readQuestion();
+    if (const auto newLocation = movePlayer()) {
+      auto question = readQuestion(*newLocation);
       askQuestion(std::move(question));
     }
 
     evaluateAnswer(Answer{});
-    if (didPlayerWin(*currentPlayer_))
+    if (didPlayerWin(currentPlayerId_))
       break;
   }
 }
 
-bool Game::isPlayable()
+bool TriviaGame::isPlayable()
 {
   return (players_.size() >= 2);
 }
 
-std::optional<int> Game::movePlayer(int roll)
+std::optional<int> TriviaGame::movePlayer()
 {
-  std::cout << currentPlayer_->name << " is the current player\n";
+  auto& currentPlayer = players_[currentPlayerId_];
+  const int roll      = rand() % 5 + 1;
+  std::cout << currentPlayer.name << " is the current player\n";
   std::cout << "They have rolled a " << roll << "\n";
 
-  if (currentPlayer_->state.inPenaltyBox) {
+  if (currentPlayer.state.inPenaltyBox) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox_ = true;
-      std::cout << currentPlayer_->name << " is getting out of the penalty box\n";
+      std::cout << currentPlayer.name << " is getting out of the penalty box\n";
     } else {
       isGettingOutOfPenaltyBox_ = false;
-      std::cout << currentPlayer_->name << " is not getting out of the penalty box\n";
+      std::cout << currentPlayer.name << " is not getting out of the penalty box\n";
       return std::nullopt;
     }
   }
 
-  currentPlayer_->state.field = (currentPlayer_->state.field + roll) % 12;
-  std::cout << currentPlayer_->name << "'s new location is " << currentPlayer_->state.field << "\n";
-  return currentPlayer_->state.field;
+  currentPlayer.state.field = (currentPlayer.state.field + roll) % 12;
+  std::cout << currentPlayer.name << "'s new location is " << currentPlayer.state.field << "\n";
+  return currentPlayer.state.field;
 }
 
-Question Game::readQuestion()
+Question TriviaGame::readQuestion(int location)
 {
-  const auto category = categoryForField(currentPlayer_->state.field);
+  const auto category = categoryForField(location);
   const auto question = nextQuestion(category);
 
   return {question, category};
 }
 
-Answer Game::askQuestion(Question question)
+Answer TriviaGame::askQuestion(Question question)
 {
   std::cout << "The category is " << ToStringView(question.category) << "\n";
   std::cout << question.text << "\n";
   return {};
 }
 
-std::string Game::nextQuestion(Category category)
+std::string TriviaGame::nextQuestion(Category category)
 {
   auto& questionGroup = questionPool_[category];
   auto question       = questionGroup.front();
@@ -102,28 +103,29 @@ std::string Game::nextQuestion(Category category)
   return question;
 }
 
-void Game::updateCurrentPlayer()
+void TriviaGame::updateCurrentPlayer()
 {
-  ++currentPlayer_;
-  if (currentPlayer_ == players_.end())
-    currentPlayer_ = players_.begin();
+  ++currentPlayerId_;
+  if (currentPlayerId_ == static_cast<int>(players_.size()))
+    currentPlayerId_ = 0;
 }
 
-bool Game::didPlayerWin(const Player& player) const
+bool TriviaGame::didPlayerWin(int playerId) const
 {
-  return player.state.coins == 6;
+  return players_[playerId].state.coins == 6;
 }
 
-void Game::evaluateAnswer(Answer /*answer*/)
+void TriviaGame::evaluateAnswer(Answer /*answer*/)
 {
+  auto& currentPlayer  = players_[currentPlayerId_];
   const bool isCorrect = rand() % 9 != 7;
   if (!isCorrect) {
     std::cout << "Question was incorrectly answered\n";
-    std::cout << currentPlayer_->name + " was sent to the penalty box\n";
-    currentPlayer_->state.inPenaltyBox = true;
+    std::cout << currentPlayer.name + " was sent to the penalty box\n";
+    currentPlayer.state.inPenaltyBox = true;
     return;
   } else {
-    if (currentPlayer_->state.inPenaltyBox) {
+    if (currentPlayer.state.inPenaltyBox) {
       if (isGettingOutOfPenaltyBox_) {
         std::cout << "Answer was correct!!!!\n";
       } else {
@@ -132,8 +134,7 @@ void Game::evaluateAnswer(Answer /*answer*/)
     } else {
       std::cout << "Answer was corrent!!!!\n";
     }
-    currentPlayer_->state.coins++;
-    std::cout << currentPlayer_->name << " now has " << currentPlayer_->state.coins
-              << " Gold Coins.\n";
+    currentPlayer.state.coins++;
+    std::cout << currentPlayer.name << " now has " << currentPlayer.state.coins << " Gold Coins.\n";
   }
 }

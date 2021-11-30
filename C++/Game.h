@@ -29,9 +29,19 @@ struct Answer {
 
 class Game {
  public:
+  virtual ~Game()                               = default;
+  virtual std::optional<int> movePlayer()       = 0;
+  virtual Question readQuestion(int location)   = 0;
+  virtual Answer askQuestion(Question question) = 0;
+  virtual void evaluateAnswer(Answer answer)    = 0;
+  virtual bool didPlayerWin(int playerId) const = 0;
+};
+
+class TriviaGame : public Game {
+ public:
   using QuestionPool = std::unordered_map<Category, std::list<std::string>>;
 
-  static Game Create(std::vector<std::string> playerNames, QuestionPool questionPool);
+  static TriviaGame Create(std::vector<std::string> playerNames, QuestionPool questionPool);
   bool isPlayable();
 
   void run();
@@ -53,22 +63,22 @@ class Game {
     PlayerState state;
   };
 
-  Game(std::vector<Player> players, QuestionPool questionPool);
+  TriviaGame(std::vector<Player> players, QuestionPool questionPool);
 
-  std::optional<int> movePlayer(int roll);
-  Question readQuestion();
-  Answer askQuestion(Question question);
-  void evaluateAnswer(Answer answer);
+  virtual std::optional<int> movePlayer() override;
+  virtual Question readQuestion(int location) override;
+  virtual Answer askQuestion(Question question) override;
+  virtual void evaluateAnswer(Answer answer) override;
 
   std::string nextQuestion(Category category);
   void updateCurrentPlayer();
 
-  bool didPlayerWin(const Player& player) const;
+  virtual bool didPlayerWin(int playerId) const override;
 
   std::vector<Player> players_;
   QuestionPool questionPool_;
 
-  std::vector<Player>::iterator currentPlayer_;
+  int currentPlayerId_;
   bool isGettingOutOfPenaltyBox_;
 };
 
