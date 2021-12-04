@@ -131,3 +131,53 @@ TEST_CASE("Game ends if the win condition is satisfied.", "[Game]")
   game.run();
   REQUIRE(turnCounter == 5);
 }
+
+TEST_CASE("Pops questions from the pool with category corresponding to the location.",
+          "[TriviaGameTurn]")
+{
+  QuestionPool questionPool = {
+      {Category::Pop, {"Pop 1", "Pop 2", "Pop 3"}},
+      {Category::Rock, {"Rock 1", "Rock 2", "Rock 3"}},
+      {Category::Science, {"Science 1", "Science 2", "Science 3"}},
+      {Category::Sports, {"Sports 1", "Sports 2", "Sports 3"}},
+  };
+  auto player = Player{"test player", {0, 0, false}};
+
+  auto turn = TriviaGameTurn(player, questionPool);
+  SECTION("Category Pop")
+  {
+    REQUIRE(turn.readQuestion(0).category == Category::Pop);
+    REQUIRE(questionPool[Category::Pop].size() == 2);
+    REQUIRE(turn.readQuestion(4).category == Category::Pop);
+    REQUIRE(questionPool[Category::Pop].size() == 1);
+    REQUIRE(turn.readQuestion(8).category == Category::Pop);
+    REQUIRE(questionPool[Category::Pop].size() == 0);
+  }
+  SECTION("Category Science")
+  {
+    REQUIRE(turn.readQuestion(1).category == Category::Science);
+    REQUIRE(questionPool[Category::Science].size() == 2);
+    REQUIRE(turn.readQuestion(5).category == Category::Science);
+    REQUIRE(questionPool[Category::Science].size() == 1);
+    REQUIRE(turn.readQuestion(9).category == Category::Science);
+    REQUIRE(questionPool[Category::Science].size() == 0);
+  }
+  SECTION("Category Sports")
+  {
+    REQUIRE(turn.readQuestion(2).category == Category::Sports);
+    REQUIRE(questionPool[Category::Sports].size() == 2);
+    REQUIRE(turn.readQuestion(6).category == Category::Sports);
+    REQUIRE(questionPool[Category::Sports].size() == 1);
+    REQUIRE(turn.readQuestion(10).category == Category::Sports);
+    REQUIRE(questionPool[Category::Sports].size() == 0);
+  }
+  SECTION("Category Rock")
+  {
+    REQUIRE(turn.readQuestion(3).category == Category::Rock);
+    REQUIRE(questionPool[Category::Rock].size() == 2);
+    REQUIRE(turn.readQuestion(7).category == Category::Rock);
+    REQUIRE(questionPool[Category::Rock].size() == 1);
+    REQUIRE(turn.readQuestion(11).category == Category::Rock);
+    REQUIRE(questionPool[Category::Rock].size() == 0);
+  }
+}
