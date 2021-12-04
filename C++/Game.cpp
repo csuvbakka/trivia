@@ -41,79 +41,14 @@ bool TriviaGame::isPlayable()
   return (players_.size() >= 2);
 }
 
-std::optional<int> TriviaGame::movePlayer(int playerId)
+std::unique_ptr<GameTurn> TriviaGame::newTurn(int playerId)
 {
-  auto& currentPlayer = players_[playerId];
-  const int roll      = rand() % 5 + 1;
-  std::cout << currentPlayer.name << " is the current player\n";
-  std::cout << "They have rolled a " << roll << "\n";
-
-  if (currentPlayer.state.inPenaltyBox) {
-    if (roll % 2 != 0) {
-      isGettingOutOfPenaltyBox_ = true;
-      std::cout << currentPlayer.name << " is getting out of the penalty box\n";
-    } else {
-      isGettingOutOfPenaltyBox_ = false;
-      std::cout << currentPlayer.name << " is not getting out of the penalty box\n";
-      return std::nullopt;
-    }
-  }
-
-  currentPlayer.state.field = (currentPlayer.state.field + roll) % 12;
-  std::cout << currentPlayer.name << "'s new location is " << currentPlayer.state.field << "\n";
-  return currentPlayer.state.field;
-}
-
-Question TriviaGame::readQuestion(int location)
-{
-  const auto category = categoryForField(location);
-  const auto question = nextQuestion(category);
-
-  return {question, category};
-}
-
-Answer TriviaGame::askQuestion(Question question)
-{
-  std::cout << "The category is " << ToStringView(question.category) << "\n";
-  std::cout << question.text << "\n";
-  return {};
-}
-
-std::string TriviaGame::nextQuestion(Category category)
-{
-  auto& questionGroup = questionPool_[category];
-  auto question       = questionGroup.front();
-  questionGroup.pop_front();
-  return question;
+  return std::make_unique<TriviaGameTurn>(players_[playerId], questionPool_);
 }
 
 bool TriviaGame::didPlayerWin(int playerId) const
 {
   return players_[playerId].state.coins == 6;
-}
-
-void TriviaGame::evaluateAnswer(int playerId, Answer /*answer*/)
-{
-  auto& currentPlayer  = players_[playerId];
-  const bool isCorrect = rand() % 9 != 7;
-  if (!isCorrect) {
-    std::cout << "Question was incorrectly answered\n";
-    std::cout << currentPlayer.name + " was sent to the penalty box\n";
-    currentPlayer.state.inPenaltyBox = true;
-    return;
-  } else {
-    if (currentPlayer.state.inPenaltyBox) {
-      if (isGettingOutOfPenaltyBox_) {
-        std::cout << "Answer was correct!!!!\n";
-      } else {
-        return;
-      }
-    } else {
-      std::cout << "Answer was corrent!!!!\n";
-    }
-    currentPlayer.state.coins++;
-    std::cout << currentPlayer.name << " now has " << currentPlayer.state.coins << " Gold Coins.\n";
-  }
 }
 
 Game::Game(int nPlayers) : nPlayers_(nPlayers) {}
@@ -123,12 +58,13 @@ void Game::run()
   int currentPlayerId = -1;
   while (true) {
     currentPlayerId = getNextPlayerId(currentPlayerId);
-    if (const auto newLocation = movePlayer(currentPlayerId)) {
-      auto question = readQuestion(*newLocation);
-      askQuestion(std::move(question));
+    auto turn       = newTurn(currentPlayerId);
+    if (const auto newLocation = turn->movePlayer()) {
+      auto question = turn->readQuestion(*newLocation);
+      turn->askQuestion(std::move(question));
     }
 
-    evaluateAnswer(currentPlayerId, Answer{});
+    turn->evaluateAnswer(Answer{});
     if (didPlayerWin(currentPlayerId))
       break;
   }
@@ -137,4 +73,77 @@ void Game::run()
 int Game::getNextPlayerId(int currentPlayerId) const
 {
   return (currentPlayerId + 1) % nPlayers_;
+}
+
+TriviaGameTurn::TriviaGameTurn(Player& player, QuestionPool& questionPool)
+    : player_(player), questionPool_(questionPool)
+{
+}
+
+std::optional<int> TriviaGameTurn::movePlayer()
+{
+  const int roll = rand() % 5 + 1;
+  std::cout << player_.name << " is the current player\n";
+  std::cout << "They have rolled a " << roll << "\n";
+
+  if (player_.state.inPenaltyBox) {
+    if (roll % 2 != 0) {
+      isGettingOutOfPenaltyBox_ = true;
+      std::cout << player_.name << " is getting out of the penalty box\n";
+    } else {
+      isGettingOutOfPenaltyBox_ = false;
+      std::cout << player_.name << " is not getting out of the penalty box\n";
+      return std::nullopt;
+    }
+  }
+
+  player_.state.field = (player_.state.field + roll) % 12;
+  std::cout << player_.name << "'s new location is " << player_.state.field << "\n";
+  return player_.state.field;
+}
+
+Question TriviaGameTurn::readQuestion(int location)
+{
+  const auto category = categoryForField(location);
+  const auto question = nextQuestion(category);
+
+  return {question, category};
+}
+
+Answer TriviaGameTurn::askQuestion(Question question)
+{
+  std::cout << "The category is " << ToStringView(question.category) << "\n";
+  std::cout << question.text << "\n";
+  return {};
+}
+
+void TriviaGameTurn::evaluateAnswer(Answer /*answer*/)
+{
+  const bool isCorrect = rand() % 9 != 7;
+  if (!isCorrect) {
+    std::cout << "Question was incorrectly answered\n";
+    std::cout << player_.name + " was sent to the penalty box\n";
+    player_.state.inPenaltyBox = true;
+    return;
+  } else {
+    if (player_.state.inPenaltyBox) {
+      if (isGettingOutOfPenaltyBox_) {
+        std::cout << "Answer was correct!!!!\n";
+      } else {
+        return;
+      }
+    } else {
+      std::cout << "Answer was corrent!!!!\n";
+    }
+    player_.state.coins++;
+    std::cout << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
+  }
+}
+
+std::string TriviaGameTurn::nextQuestion(Category category)
+{
+  auto& questionGroup = questionPool_[category];
+  auto question       = questionGroup.front();
+  questionGroup.pop_front();
+  return question;
 }

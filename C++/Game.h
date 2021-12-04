@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <memory>
 #include <optional>
 #include <string_view>
 #include <unordered_map>
@@ -27,6 +28,33 @@ struct Question {
 struct Answer {
 };
 
+struct PlayerState {
+  PlayerState(int field, int coins, bool inPenaltyBox)
+      : field(field), coins(coins), inPenaltyBox(inPenaltyBox)
+  {
+  }
+  int field;
+  int coins;
+  bool inPenaltyBox;
+};
+
+struct Player {
+  Player(std::string name, PlayerState state) : name(std::move(name)), state(state) {}
+  std::string name;
+  PlayerState state;
+};
+using QuestionPool = std::unordered_map<Category, std::list<std::string>>;
+
+class GameTurn {
+ public:
+  virtual ~GameTurn() = default;
+
+  virtual std::optional<int> movePlayer()     = 0;
+  virtual Question readQuestion(int location) = 0;
+  virtual Answer askQuestion(Question)        = 0;
+  virtual void evaluateAnswer(Answer)         = 0;
+};
+
 class Game {
  public:
   Game(int nPlayers);
@@ -37,48 +65,38 @@ class Game {
  private:
   int getNextPlayerId(int currentPlayerId) const;
 
-  virtual std::optional<int> movePlayer(int playerId)      = 0;
-  virtual Question readQuestion(int location)              = 0;
-  virtual Answer askQuestion(Question question)            = 0;
-  virtual void evaluateAnswer(int playerId, Answer answer) = 0;
-  virtual bool didPlayerWin(int playerId) const            = 0;
+  virtual std::unique_ptr<GameTurn> newTurn(int playerId) = 0;
+  virtual bool didPlayerWin(int playerId) const           = 0;
 
   int nPlayers_;
 };
 
+class TriviaGameTurn : public GameTurn {
+ public:
+  TriviaGameTurn(Player& player, QuestionPool& questionPool);
+
+  virtual std::optional<int> movePlayer() override;
+  virtual Question readQuestion(int location) override;
+  virtual Answer askQuestion(Question question) override;
+  virtual void evaluateAnswer(Answer answer) override;
+
+ private:
+  std::string nextQuestion(Category category);
+
+  Player& player_;
+  QuestionPool& questionPool_;
+  bool isGettingOutOfPenaltyBox_;
+};
+
 class TriviaGame : public Game {
  public:
-  using QuestionPool = std::unordered_map<Category, std::list<std::string>>;
-
   static TriviaGame Create(std::vector<std::string> playerNames, QuestionPool questionPool);
   bool isPlayable();
 
  private:
-  struct PlayerState {
-    PlayerState(int field, int coins, bool inPenaltyBox)
-        : field(field), coins(coins), inPenaltyBox(inPenaltyBox)
-    {
-    }
-    int field;
-    int coins;
-    bool inPenaltyBox;
-  };
-
-  struct Player {
-    Player(std::string name, PlayerState state) : name(std::move(name)), state(state) {}
-    std::string name;
-    PlayerState state;
-  };
-
   TriviaGame(std::vector<Player> players, QuestionPool questionPool);
 
-  virtual std::optional<int> movePlayer(int playerId) override;
-  virtual Question readQuestion(int location) override;
-  virtual Answer askQuestion(Question question) override;
-  virtual void evaluateAnswer(int playerId, Answer answer) override;
-
-  std::string nextQuestion(Category category);
-
+  virtual std::unique_ptr<GameTurn> newTurn(int playerId) override;
   virtual bool didPlayerWin(int playerId) const override;
 
   std::vector<Player> players_;
