@@ -28,20 +28,20 @@ struct Question {
 struct Answer {
 };
 
-struct PlayerState {
-  PlayerState(int field, int coins, bool inPenaltyBox)
-      : field(field), coins(coins), inPenaltyBox(inPenaltyBox)
-  {
-  }
-  int field;
-  int coins;
-  bool inPenaltyBox;
-};
-
 struct Player {
-  Player(std::string name, PlayerState state) : name(std::move(name)), state(state) {}
+  struct State {
+    State(int field, int coins, bool inPenaltyBox)
+        : field(field), coins(coins), inPenaltyBox(inPenaltyBox)
+    {
+    }
+    int field;
+    int coins;
+    bool inPenaltyBox;
+  };
+
+  Player(std::string name, State state) : name(std::move(name)), state(state) {}
   std::string name;
-  PlayerState state;
+  State state;
 };
 using QuestionPool = std::unordered_map<Category, std::list<std::string>>;
 

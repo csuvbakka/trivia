@@ -28,7 +28,7 @@ TriviaGame TriviaGame::Create(std::vector<std::string> playerNames, QuestionPool
   players.reserve(playerNames.size());
 
   for (auto&& name : playerNames) {
-    players.emplace_back(std::move(name), PlayerState{0, 0, false});
+    players.emplace_back(std::move(name), Player::State{0, 0, false});
     std::cout << players.back().name << " was added\n";
     std::cout << "They are player number " << players.size() << "\n";
   }
