@@ -4,6 +4,15 @@
 #include "Game.h"
 
 #include <functional>
+QuestionPool createTestQuestions()
+{
+  return {
+      {Category::Pop, {"Pop 1", "Pop 2", "Pop 3"}},
+      {Category::Rock, {"Rock 1", "Rock 2", "Rock 3"}},
+      {Category::Science, {"Science 1", "Science 2", "Science 3"}},
+      {Category::Sports, {"Sports 1", "Sports 2", "Sports 3"}},
+  };
+}
 
 struct FakeGameTurn : public GameTurn {
   FakeGameTurn()
@@ -156,13 +165,8 @@ TEST_CASE("Game ends if the win condition is satisfied.", "[Game]")
 TEST_CASE("Pops questions from the pool with category corresponding to the location.",
           "[TriviaGameTurn]")
 {
-  QuestionPool questionPool = {
-      {Category::Pop, {"Pop 1", "Pop 2", "Pop 3"}},
-      {Category::Rock, {"Rock 1", "Rock 2", "Rock 3"}},
-      {Category::Science, {"Science 1", "Science 2", "Science 3"}},
-      {Category::Sports, {"Sports 1", "Sports 2", "Sports 3"}},
-  };
-  auto player = Player{"test player", {0, 0, false}};
+  auto questionPool = createTestQuestions();
+  auto player       = Player{"test player", {0, 0, false}};
 
   auto turn = TriviaGameTurn(player, questionPool);
   SECTION("Category Pop")
@@ -200,5 +204,42 @@ TEST_CASE("Pops questions from the pool with category corresponding to the locat
     REQUIRE(questionPool[Category::Rock].size() == 1);
     REQUIRE(turn.readQuestion(11).category == Category::Rock);
     REQUIRE(questionPool[Category::Rock].size() == 0);
+  }
+}
+
+TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
+{
+  auto player       = Player{"test player", {0, 0, false}};
+  auto questionPool = createTestQuestions();
+
+  SECTION("Player can move if it is not in the penalty box.")
+  {
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    player.state.inPenaltyBox = false;
+    player.state.field        = 0;
+
+    auto newLocation = turn.movePlayer(3);
+    CHECK(newLocation.value() == 3);
+    REQUIRE(player.state.field == 3);
+  }
+  SECTION("Player can move if it is in the penalty box, but rolled odd.")
+  {
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    player.state.inPenaltyBox = true;
+    player.state.field        = 0;
+
+    auto newLocation = turn.movePlayer(3);
+    CHECK(newLocation.value() == 3);
+    REQUIRE(player.state.field == 3);
+  }
+  SECTION("Player cannot move if it is in the penalty box and rolled even.")
+  {
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    player.state.inPenaltyBox = true;
+    player.state.field        = 1;
+
+    auto newLocation = turn.movePlayer(2);
+    CHECK(!newLocation.has_value());
+    REQUIRE(player.state.field == 1);
   }
 }
