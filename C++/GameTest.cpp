@@ -30,40 +30,51 @@ struct FakeGameTurn : public GameTurn {
 };
 
 struct FakeGame : public Game {
-  FakeGame(int nPlayers) : Game(nPlayers), didPlayerWin_([](int) { return false; }) {}
+  FakeGame(int nPlayers, int nTurns)
+      : Game(nPlayers)
+      , newTurn_([](int /*playerId*/) { return std::make_unique<FakeGameTurn>(); })
+      , currentTurn_(0)
+      , nTurns_(nTurns)
+  {
+  }
 
-  virtual std::unique_ptr<GameTurn> newTurn(int playerId) override { return newTurn_(playerId); }
-  virtual bool didPlayerWin(int playerId) const override { return didPlayerWin_(playerId); }
+  int currentTurn() const { return currentTurn_; }
+
+  virtual std::unique_ptr<GameTurn> newTurn(int playerId) override
+  {
+    ++currentTurn_;
+    return newTurn_(playerId);
+  }
+  virtual bool didPlayerWin(int) const override { return currentTurn_ == nTurns_; }
 
   std::function<std::unique_ptr<GameTurn>(int)> newTurn_;
-  std::function<bool(int)> didPlayerWin_;
+
+ private:
+  int currentTurn_;
+  int nTurns_;
 };
 
 TEST_CASE("Players take turns in cyclical order.", "[Game]")
 {
-  int turnCounter = 0;
   std::vector<int> playerIds;
 
-  auto game     = FakeGame(3);
-  game.newTurn_ = [&](int playerId) {
-    turnCounter += 1;
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int playerId) {
     playerIds.push_back(playerId);
     return std::make_unique<FakeGameTurn>();
   };
-  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
   game.run();
-
-  CHECK(turnCounter == 5);
   REQUIRE(playerIds == std::vector<int>{0, 1, 2, 0, 1});
 }
 
 TEST_CASE("Players roll the dice then move.", "[Game]")
 {
-  int turnCounter = 0;
-
-  auto game     = FakeGame(3);
-  game.newTurn_ = [&](int playerId) {
-    turnCounter += 1;
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int playerId) {
     auto turn         = std::make_unique<FakeGameTurn>();
     turn->rollDice_   = [playerId] { return playerId; };
     turn->movePlayer_ = [playerId](int roll) {
@@ -72,86 +83,74 @@ TEST_CASE("Players roll the dice then move.", "[Game]")
     };
     return turn;
   };
-  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
   game.run();
 }
 
 TEST_CASE("Players move then get a question corresponding to their current location.", "[Game]")
 {
-  int turnCounter = 0;
   std::vector<int> locations;
 
-  auto game     = FakeGame(3);
-  game.newTurn_ = [&](int /*playerId*/) {
-    turnCounter += 1;
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int /*playerId*/) {
     auto turn           = std::make_unique<FakeGameTurn>();
-    turn->movePlayer_   = [&turnCounter](int) { return turnCounter; };
+    turn->movePlayer_   = [&game](int) { return game.currentTurn(); };
     turn->readQuestion_ = [&locations](int location) {
       locations.push_back(location);
       return Question{"test question", Category::Rock};
     };
     return turn;
   };
-  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
   game.run();
-
-  CHECK(turnCounter == 5);
   REQUIRE(locations == std::vector<int>{1, 2, 3, 4, 5});
 }
 
 TEST_CASE("Players are asked questions.", "[Game]")
 {
-  int turnCounter = 0;
   std::vector<int> locations;
 
-  auto game     = FakeGame(3);
-  game.newTurn_ = [&](int /*playerId*/) {
-    turnCounter += 1;
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int /*playerId*/) {
     auto turn           = std::make_unique<FakeGameTurn>();
-    turn->movePlayer_   = [&turnCounter](int) { return turnCounter; };
+    turn->movePlayer_   = [&game](int) { return game.currentTurn(); };
     turn->readQuestion_ = [&locations](int location) {
       locations.push_back(location);
       return Question{"test question " + std::to_string(location), Category::Science};
     };
-    turn->askQuestion_ = [&turnCounter](Question question) {
+    turn->askQuestion_ = [&game](Question question) {
       CHECK(question.category == Category::Science);
-      CHECK(question.text == "test question " + std::to_string(turnCounter));
+      CHECK(question.text == "test question " + std::to_string(game.currentTurn()));
       return Answer{};
     };
     return turn;
   };
-  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
   game.run();
 }
 
 TEST_CASE("Answers are evaluated.", "[Game]")
 {
-  int turnCounter = 0;
-  int nAnswers    = 0;
-
-  auto game     = FakeGame(3);
-  game.newTurn_ = [&](int /*playerId*/) {
-    turnCounter += 1;
+  int nAnswers       = 0;
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int /*playerId*/) {
     auto turn             = std::make_unique<FakeGameTurn>();
-    turn->evaluateAnswer_ = [&](Answer) { REQUIRE(++nAnswers == turnCounter); };
+    turn->evaluateAnswer_ = [&](Answer) { REQUIRE(++nAnswers == game.currentTurn()); };
     return turn;
   };
-  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
   game.run();
 }
 
 TEST_CASE("Game ends if the win condition is satisfied.", "[Game]")
 {
-  int turnCounter = 0;
-
-  auto game     = FakeGame(3);
-  game.newTurn_ = [&](int /*playerId*/) {
-    turnCounter += 1;
-    return std::make_unique<FakeGameTurn>();
-  };
-  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
   game.run();
-  REQUIRE(turnCounter == 5);
+  REQUIRE(game.currentTurn() == 5);
 }
 
 TEST_CASE("Pops questions from the pool with category corresponding to the location.",
