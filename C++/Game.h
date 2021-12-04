@@ -103,8 +103,6 @@ class TriviaGame : public Game {
 
   std::vector<Player> players_;
   QuestionPool questionPool_;
-
-  bool isGettingOutOfPenaltyBox_;
 };
 
 #endif /* GAME_H_ */
