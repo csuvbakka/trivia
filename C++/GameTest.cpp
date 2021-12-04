@@ -7,7 +7,8 @@
 
 struct FakeGameTurn : public GameTurn {
   FakeGameTurn()
-      : movePlayer_([]() { return 1; })
+      : rollDice_([]() { return 1; })
+      , movePlayer_([](int roll) { return roll; })
       , readQuestion_([](int) {
         return Question{"test question", Category::Pop};
       })
@@ -15,12 +16,14 @@ struct FakeGameTurn : public GameTurn {
       , evaluateAnswer_([](Answer) {})
   {
   }
-  virtual std::optional<int> movePlayer() override { return movePlayer_(); }
+  virtual int rollDice() const override { return rollDice_(); }
+  virtual std::optional<int> movePlayer(int roll) override { return movePlayer_(roll); }
   virtual Question readQuestion(int location) override { return readQuestion_(location); }
   virtual Answer askQuestion(Question question) override { return askQuestion_(question); }
   virtual void evaluateAnswer(Answer answer) override { return evaluateAnswer_(answer); }
 
-  std::function<std::optional<int>()> movePlayer_;
+  std::function<int()> rollDice_;
+  std::function<std::optional<int>(int)> movePlayer_;
   std::function<Question(int)> readQuestion_;
   std::function<Answer(Question)> askQuestion_;
   std::function<void(Answer)> evaluateAnswer_;
@@ -54,6 +57,25 @@ TEST_CASE("Players take turns in cyclical order.", "[Game]")
   REQUIRE(playerIds == std::vector<int>{0, 1, 2, 0, 1});
 }
 
+TEST_CASE("Players roll the dice then move.", "[Game]")
+{
+  int turnCounter = 0;
+
+  auto game     = FakeGame(3);
+  game.newTurn_ = [&](int playerId) {
+    turnCounter += 1;
+    auto turn         = std::make_unique<FakeGameTurn>();
+    turn->rollDice_   = [playerId] { return playerId; };
+    turn->movePlayer_ = [playerId](int roll) {
+      REQUIRE(roll == playerId);
+      return 1;
+    };
+    return turn;
+  };
+  game.didPlayerWin_ = [&turnCounter](int) { return turnCounter == 5; };
+  game.run();
+}
+
 TEST_CASE("Players move then get a question corresponding to their current location.", "[Game]")
 {
   int turnCounter = 0;
@@ -63,7 +85,7 @@ TEST_CASE("Players move then get a question corresponding to their current locat
   game.newTurn_ = [&](int /*playerId*/) {
     turnCounter += 1;
     auto turn           = std::make_unique<FakeGameTurn>();
-    turn->movePlayer_   = [&turnCounter]() { return turnCounter; };
+    turn->movePlayer_   = [&turnCounter](int) { return turnCounter; };
     turn->readQuestion_ = [&locations](int location) {
       locations.push_back(location);
       return Question{"test question", Category::Rock};
@@ -86,7 +108,7 @@ TEST_CASE("Players are asked questions.", "[Game]")
   game.newTurn_ = [&](int /*playerId*/) {
     turnCounter += 1;
     auto turn           = std::make_unique<FakeGameTurn>();
-    turn->movePlayer_   = [&turnCounter]() { return turnCounter; };
+    turn->movePlayer_   = [&turnCounter](int) { return turnCounter; };
     turn->readQuestion_ = [&locations](int location) {
       locations.push_back(location);
       return Question{"test question " + std::to_string(location), Category::Science};

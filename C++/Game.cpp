@@ -59,7 +59,7 @@ void Game::run()
   while (true) {
     currentPlayerId = getNextPlayerId(currentPlayerId);
     auto turn       = newTurn(currentPlayerId);
-    if (const auto newLocation = turn->movePlayer()) {
+    if (const auto newLocation = turn->movePlayer(turn->rollDice())) {
       auto question = turn->readQuestion(*newLocation);
       turn->askQuestion(std::move(question));
     }
@@ -80,12 +80,16 @@ TriviaGameTurn::TriviaGameTurn(Player& player, QuestionPool& questionPool)
 {
 }
 
-std::optional<int> TriviaGameTurn::movePlayer()
+int TriviaGameTurn::rollDice() const
 {
   const int roll = rand() % 5 + 1;
   std::cout << player_.name << " is the current player\n";
   std::cout << "They have rolled a " << roll << "\n";
+  return roll;
+}
 
+std::optional<int> TriviaGameTurn::movePlayer(int roll)
+{
   if (player_.state.inPenaltyBox) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox_ = true;

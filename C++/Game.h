@@ -49,10 +49,11 @@ class GameTurn {
  public:
   virtual ~GameTurn() = default;
 
-  virtual std::optional<int> movePlayer()     = 0;
-  virtual Question readQuestion(int location) = 0;
-  virtual Answer askQuestion(Question)        = 0;
-  virtual void evaluateAnswer(Answer)         = 0;
+  virtual int rollDice() const                    = 0;
+  virtual std::optional<int> movePlayer(int roll) = 0;
+  virtual Question readQuestion(int location)     = 0;
+  virtual Answer askQuestion(Question)            = 0;
+  virtual void evaluateAnswer(Answer)             = 0;
 };
 
 class Game {
@@ -75,7 +76,8 @@ class TriviaGameTurn : public GameTurn {
  public:
   TriviaGameTurn(Player& player, QuestionPool& questionPool);
 
-  virtual std::optional<int> movePlayer() override;
+  virtual int rollDice() const override;
+  virtual std::optional<int> movePlayer(int roll) override;
   virtual Question readQuestion(int location) override;
   virtual Answer askQuestion(Question question) override;
   virtual void evaluateAnswer(Answer answer) override;
