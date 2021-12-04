@@ -1,6 +1,6 @@
 CLIENT_FILES = GameRunner.cpp
 GAME_FILES = Game.cpp Game.h
-TEST_FILES = Game.cpp Game.h
+TEST_FILES = GameTest.cpp $(GAME_FILES)
 CC = g++
 OPTS = -std=c++17 -Wall -Wextra -Werror
 OUTOPTS = -o 
