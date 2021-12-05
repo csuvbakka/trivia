@@ -13,10 +13,12 @@ Category categoryForField(int field)
 
 TriviaGame::TriviaGame(std::vector<TriviaPlayer> players,
                        TriviaQuestionPool questionPool,
+                       std::mt19937 rng,
                        std::ostream& logger)
     : Game(players.size())
     , players_(std::move(players))
     , questionPool_(std::move(questionPool))
+    , rng_(rng)
     , logger_(logger)
 {
 }
@@ -37,12 +39,15 @@ std::optional<TriviaGame> TriviaGame::Create(std::vector<std::string> playerName
     logger << "They are player number " << players.size() << "\n";
   }
 
-  return TriviaGame(std::move(players), std::move(questionPool), logger);
+  std::random_device rd;
+  std::mt19937 mt(rd());
+
+  return TriviaGame(std::move(players), std::move(questionPool), mt, logger);
 }
 
 std::unique_ptr<GameTurn> TriviaGame::newTurn(int playerId)
 {
-  return std::make_unique<TriviaGameTurn>(players_[playerId], questionPool_, logger_);
+  return std::make_unique<TriviaGameTurn>(players_[playerId], questionPool_, rng_, logger_);
 }
 
 bool TriviaGame::didPlayerWin(int playerId) const
@@ -52,14 +57,16 @@ bool TriviaGame::didPlayerWin(int playerId) const
 
 TriviaGameTurn::TriviaGameTurn(TriviaPlayer& player,
                                TriviaQuestionPool& questionPool,
+                               std::mt19937& rng,
                                std::ostream& logger)
-    : player_(player), questionPool_(questionPool), logger_(logger)
+    : player_(player), questionPool_(questionPool), rng_(rng), logger_(logger)
 {
 }
 
 int TriviaGameTurn::rollDice() const
 {
-  const int roll = rand() % 5 + 1;
+  std::uniform_int_distribution<int> rollRange(1, 5);
+  const int roll = rollRange(rng_);
   logger_ << player_.name << " is the current player\n";
   logger_ << "They have rolled a " << roll << "\n";
   return roll;
@@ -101,7 +108,8 @@ Answer TriviaGameTurn::askQuestion(Question question)
 
 bool TriviaGameTurn::isAnswerCorrect(Answer /*answer*/)
 {
-  return rand() % 9 != 7;
+  std::uniform_int_distribution<int> intDist(0, 8);
+  return intDist(rng_) != 7;
 }
 
 void TriviaGameTurn::onCorrectAnswer()

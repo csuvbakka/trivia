@@ -1,6 +1,5 @@
 ﻿#include "TriviaGame.h"
 
-#include <stdlib.h>
 #include <iostream>
 #include <string>
 
@@ -22,7 +21,6 @@ TriviaQuestionPool generateQuestions()
 
 int main()
 {
-  srand(time(NULL));
   auto aGame = TriviaGame::Create({"Chet", "Pat", "Sue"}, generateQuestions(), std::cout);
   if (aGame.has_value())
     aGame->run();

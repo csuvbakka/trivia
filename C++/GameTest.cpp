@@ -29,6 +29,8 @@ struct DevNullLogger : private std::streambuf, public std::ostream {
 };
 
 DevNullLogger devNull;
+std::random_device rd;
+std::mt19937 testRng(rd());
 
 struct FakeGameTurn : public GameTurn {
   FakeGameTurn()
@@ -242,7 +244,7 @@ TEST_CASE("Question categories are assigned in cyclical order.", "[TriviaGameTur
   auto questionPool = createTestQuestions();
   auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
-  auto turn = TriviaGameTurn(player, questionPool, devNull);
+  auto turn = TriviaGameTurn(player, questionPool, testRng, devNull);
   REQUIRE(turn.readQuestion(0)->category == Category::Pop);
   REQUIRE(turn.readQuestion(1)->category == Category::Science);
   REQUIRE(turn.readQuestion(2)->category == Category::Sports);
@@ -263,7 +265,7 @@ TEST_CASE("Pops questions from the pool with category corresponding to the locat
   auto questionPool = createTestQuestions();
   auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
-  auto turn = TriviaGameTurn(player, questionPool, devNull);
+  auto turn = TriviaGameTurn(player, questionPool, testRng, devNull);
   SECTION("Category Pop")
   {
     turn.readQuestion(0);
@@ -291,7 +293,7 @@ TEST_CASE("Questions are consumed in the order they were added.", "[TriviaGameTu
   auto questionPool = createTestQuestions();
   auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
-  auto turn = TriviaGameTurn(player, questionPool, devNull);
+  auto turn = TriviaGameTurn(player, questionPool, testRng, devNull);
   REQUIRE(turn.readQuestion(0)->text == "Pop 1");
   REQUIRE(turn.readQuestion(0)->text == "Pop 2");
 }
@@ -302,7 +304,7 @@ TEST_CASE("The question is logged.", "[TriviaGameTurn]")
   auto questionPool = createTestQuestions();
 
   std::ostringstream logger;
-  auto turn = TriviaGameTurn(player, questionPool, logger);
+  auto turn = TriviaGameTurn(player, questionPool, testRng, logger);
   turn.askQuestion(Question{"test question", Category::Rock});
 
   REQUIRE(logger.str() == "The category is Rock\ntest question\n");
@@ -314,7 +316,7 @@ TEST_CASE("Dice roll is logged.", "[TriviaGameTurn]")
   auto questionPool = createTestQuestions();
 
   std::ostringstream logger;
-  auto turn = TriviaGameTurn(player, questionPool, logger);
+  auto turn = TriviaGameTurn(player, questionPool, testRng, logger);
   turn.rollDice();
 
   REQUIRE_THAT(logger.str(),
@@ -328,7 +330,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
 
   SECTION("Player can move if they are not in the penalty box.")
   {
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, devNull);
     player.state.inPenaltyBox = false;
     player.state.field        = 0;
 
@@ -338,7 +340,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
   }
   SECTION("Player can move if they are in the penalty box and rolled odd.")
   {
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, devNull);
     player.state.inPenaltyBox = true;
     player.state.field        = 0;
 
@@ -348,7 +350,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
   }
   SECTION("Player cannot move if they are in the penalty box and rolled even.")
   {
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, devNull);
     player.state.inPenaltyBox = true;
     player.state.field        = 1;
 
@@ -358,7 +360,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
   }
   SECTION("The board is circular and has 12 fields.")
   {
-    auto turn          = TriviaGameTurn(player, questionPool, devNull);
+    auto turn          = TriviaGameTurn(player, questionPool, testRng, devNull);
     player.state.field = 10;
     turn.movePlayer(7);
     REQUIRE(player.state.field == 5);
@@ -370,7 +372,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
   SECTION("Player's new location is logged if they are not in the penalty box.")
   {
     std::ostringstream logger;
-    auto turn                 = TriviaGameTurn(player, questionPool, logger);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, logger);
     player.state.inPenaltyBox = false;
     player.state.field        = 1;
 
@@ -380,7 +382,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
   SECTION("Player's new location is logged if they are in the penalty box and rolled odd.")
   {
     std::ostringstream logger;
-    auto turn                 = TriviaGameTurn(player, questionPool, logger);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, logger);
     player.state.inPenaltyBox = true;
     player.state.field        = 1;
 
@@ -392,7 +394,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
   SECTION("Player's new location is not logged if they are in the penalty box and rolled even.")
   {
     std::ostringstream logger;
-    auto turn                 = TriviaGameTurn(player, questionPool, logger);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, logger);
     player.state.inPenaltyBox = true;
     player.state.field        = 1;
 
@@ -410,7 +412,7 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
   SECTION("They get a gold coin.")
   {
     player.state.coins = 0;
-    auto turn          = TriviaGameTurn(player, questionPool, devNull);
+    auto turn          = TriviaGameTurn(player, questionPool, testRng, devNull);
     turn.onCorrectAnswer();
     REQUIRE(player.state.coins == 1);
     turn.onCorrectAnswer();
@@ -420,7 +422,7 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
   {
     std::ostringstream logger;
     player.state.coins = 0;
-    auto turn          = TriviaGameTurn(player, questionPool, logger);
+    auto turn          = TriviaGameTurn(player, questionPool, testRng, logger);
     turn.onCorrectAnswer();
     REQUIRE(logger.str() == "Answer was correct!!!!\n" + player.name + " now has 1 Gold Coins.\n");
   }
@@ -434,21 +436,21 @@ TEST_CASE("If a player answers incorrectly.", "[TriviaGameTurn]")
   SECTION("They are sent to the penalty box.")
   {
     player.state.inPenaltyBox = false;
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
+    auto turn                 = TriviaGameTurn(player, questionPool, testRng, devNull);
     turn.onIncorrectAnswer();
     REQUIRE(player.state.inPenaltyBox);
   }
   SECTION("They get no gold coins.")
   {
     player.state.coins = 0;
-    auto turn          = TriviaGameTurn(player, questionPool, devNull);
+    auto turn          = TriviaGameTurn(player, questionPool, testRng, devNull);
     turn.onIncorrectAnswer();
     REQUIRE(player.state.coins == 0);
   }
   SECTION("It is added to the log.")
   {
     std::ostringstream logger;
-    auto turn = TriviaGameTurn(player, questionPool, logger);
+    auto turn = TriviaGameTurn(player, questionPool, testRng, logger);
     turn.onIncorrectAnswer();
     REQUIRE(logger.str()
             == "Question was incorrectly answered\n" + player.name
