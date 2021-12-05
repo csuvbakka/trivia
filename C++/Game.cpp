@@ -17,23 +17,28 @@ Category categoryForField(int field)
 }
 }  // namespace
 
-TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool)
-    : Game(players.size()), players_(std::move(players)), questionPool_(std::move(questionPool))
+TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool, std::ostream& logger)
+    : Game(players.size())
+    , players_(std::move(players))
+    , questionPool_(std::move(questionPool))
+    , logger_(logger)
 {
 }
 
-TriviaGame TriviaGame::Create(std::vector<std::string> playerNames, QuestionPool questionPool)
+TriviaGame TriviaGame::Create(std::vector<std::string> playerNames,
+                              QuestionPool questionPool,
+                              std::ostream& logger)
 {
   std::vector<Player> players;
   players.reserve(playerNames.size());
 
   for (auto&& name : playerNames) {
     players.emplace_back(std::move(name), Player::State{0, 0, false});
-    std::cout << players.back().name << " was added\n";
-    std::cout << "They are player number " << players.size() << "\n";
+    logger << players.back().name << " was added\n";
+    logger << "They are player number " << players.size() << "\n";
   }
 
-  return TriviaGame(std::move(players), std::move(questionPool));
+  return TriviaGame(std::move(players), std::move(questionPool), logger);
 }
 
 bool TriviaGame::isPlayable()
@@ -43,7 +48,7 @@ bool TriviaGame::isPlayable()
 
 std::unique_ptr<GameTurn> TriviaGame::newTurn(int playerId)
 {
-  return std::make_unique<TriviaGameTurn>(players_[playerId], questionPool_);
+  return std::make_unique<TriviaGameTurn>(players_[playerId], questionPool_, logger_);
 }
 
 bool TriviaGame::didPlayerWin(int playerId) const
@@ -79,16 +84,16 @@ int Game::getNextPlayerId(int currentPlayerId) const
   return (currentPlayerId + 1) % nPlayers_;
 }
 
-TriviaGameTurn::TriviaGameTurn(Player& player, QuestionPool& questionPool)
-    : player_(player), questionPool_(questionPool)
+TriviaGameTurn::TriviaGameTurn(Player& player, QuestionPool& questionPool, std::ostream& logger)
+    : player_(player), questionPool_(questionPool), logger_(logger)
 {
 }
 
 int TriviaGameTurn::rollDice() const
 {
   const int roll = rand() % 5 + 1;
-  std::cout << player_.name << " is the current player\n";
-  std::cout << "They have rolled a " << roll << "\n";
+  logger_ << player_.name << " is the current player\n";
+  logger_ << "They have rolled a " << roll << "\n";
   return roll;
 }
 
@@ -97,16 +102,16 @@ std::optional<int> TriviaGameTurn::movePlayer(int roll)
   if (player_.state.inPenaltyBox) {
     if (roll % 2 != 0) {
       isGettingOutOfPenaltyBox_ = true;
-      std::cout << player_.name << " is getting out of the penalty box\n";
+      logger_ << player_.name << " is getting out of the penalty box\n";
     } else {
       isGettingOutOfPenaltyBox_ = false;
-      std::cout << player_.name << " is not getting out of the penalty box\n";
+      logger_ << player_.name << " is not getting out of the penalty box\n";
       return std::nullopt;
     }
   }
 
   player_.state.field = (player_.state.field + roll) % 12;
-  std::cout << player_.name << "'s new location is " << player_.state.field << "\n";
+  logger_ << player_.name << "'s new location is " << player_.state.field << "\n";
   return player_.state.field;
 }
 
@@ -120,8 +125,8 @@ Question TriviaGameTurn::readQuestion(int location)
 
 Answer TriviaGameTurn::askQuestion(Question question)
 {
-  std::cout << "The category is " << ToStringView(question.category) << "\n";
-  std::cout << question.text << "\n";
+  logger_ << "The category is " << ToStringView(question.category) << "\n";
+  logger_ << question.text << "\n";
   return {};
 }
 
@@ -134,21 +139,21 @@ void TriviaGameTurn::onCorrectAnswer()
 {
   if (player_.state.inPenaltyBox) {
     if (isGettingOutOfPenaltyBox_) {
-      std::cout << "Answer was correct!!!!\n";
+      logger_ << "Answer was correct!!!!\n";
     } else {
       return;
     }
   } else {
-    std::cout << "Answer was corrent!!!!\n";
+    logger_ << "Answer was corrent!!!!\n";
   }
   player_.state.coins++;
-  std::cout << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
+  logger_ << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
 }
 
 void TriviaGameTurn::onIncorrectAnswer()
 {
-  std::cout << "Question was incorrectly answered\n";
-  std::cout << player_.name + " was sent to the penalty box\n";
+  logger_ << "Question was incorrectly answered\n";
+  logger_ << player_.name + " was sent to the penalty box\n";
   player_.state.inPenaltyBox = true;
 }
 

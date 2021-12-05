@@ -22,6 +22,6 @@ QuestionPool generateQuestions()
 int main()
 {
   srand(time(NULL));
-  auto aGame = TriviaGame::Create({"Chet", "Pat", "Sue"}, generateQuestions());
+  auto aGame = TriviaGame::Create({"Chet", "Pat", "Sue"}, generateQuestions(), std::cout);
   aGame.run();
 }
