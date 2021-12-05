@@ -21,6 +21,7 @@ struct TriviaPlayer {
 };
 using TriviaQuestionPool = std::unordered_map<Category, std::list<std::string>>;
 
+///  Implements the mechanics of a single turn of the Trivia game.
 class TriviaGameTurn : public GameTurn {
  public:
   TriviaGameTurn(TriviaPlayer& player, TriviaQuestionPool& questionPool, std::ostream& logger);
