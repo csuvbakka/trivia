@@ -78,12 +78,14 @@ std::optional<int> TriviaGameTurn::movePlayer(int roll)
   return player_.state.field;
 }
 
-Question TriviaGameTurn::readQuestion(int location)
+std::optional<Question> TriviaGameTurn::readQuestion(int location)
 {
   const auto category = categoryForField(location);
   const auto question = nextQuestion(category);
+  if (!question.has_value())
+    return std::nullopt;
 
-  return {question, category};
+  return Question{std::move(*question), category};
 }
 
 Answer TriviaGameTurn::askQuestion(Question question)
@@ -112,10 +114,13 @@ void TriviaGameTurn::onIncorrectAnswer()
   player_.state.inPenaltyBox = true;
 }
 
-std::string TriviaGameTurn::nextQuestion(Category category)
+std::optional<std::string> TriviaGameTurn::nextQuestion(Category category)
 {
   auto& questionGroup = questionPool_[category];
-  auto question       = questionGroup.front();
+  if (questionGroup.empty())
+    return std::nullopt;
+
+  auto question = questionGroup.front();
   questionGroup.pop_front();
   return question;
 }

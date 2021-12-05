@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 
-
 Game::Game(int nPlayers) : nPlayers_(nPlayers) {}
 
 void Game::run()
@@ -16,7 +15,9 @@ void Game::run()
     auto turn       = newTurn(currentPlayerId);
     if (const auto newLocation = turn->movePlayer(turn->rollDice())) {
       auto question = turn->readQuestion(*newLocation);
-      auto answer   = turn->askQuestion(std::move(question));
+      if (!question.has_value())
+        continue;
+      auto answer = turn->askQuestion(std::move(*question));
       if (turn->isAnswerCorrect(answer))
         turn->onCorrectAnswer();
       else
@@ -32,4 +33,3 @@ int Game::getNextPlayerId(int currentPlayerId) const
 {
   return (currentPlayerId + 1) % nPlayers_;
 }
-

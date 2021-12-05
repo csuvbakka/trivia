@@ -8,7 +8,6 @@
 #include <unordered_map>
 #include <vector>
 
-
 enum class Category { Pop, Science, Sports, Rock };
 constexpr std::string_view ToStringView(Category category)
 {
@@ -32,13 +31,13 @@ class GameTurn {
  public:
   virtual ~GameTurn() = default;
 
-  virtual int rollDice() const                    = 0;
-  virtual std::optional<int> movePlayer(int roll) = 0;
-  virtual Question readQuestion(int location)     = 0;
-  virtual Answer askQuestion(Question)            = 0;
-  virtual bool isAnswerCorrect(Answer)            = 0;
-  virtual void onCorrectAnswer()                  = 0;
-  virtual void onIncorrectAnswer()                = 0;
+  virtual int rollDice() const                               = 0;
+  virtual std::optional<int> movePlayer(int roll)            = 0;
+  virtual std::optional<Question> readQuestion(int location) = 0;
+  virtual Answer askQuestion(Question)                       = 0;
+  virtual bool isAnswerCorrect(Answer)                       = 0;
+  virtual void onCorrectAnswer()                             = 0;
+  virtual void onIncorrectAnswer()                           = 0;
 };
 
 class Game {

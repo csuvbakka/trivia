@@ -45,7 +45,10 @@ struct FakeGameTurn : public GameTurn {
   }
   virtual int rollDice() const override { return rollDice_(); }
   virtual std::optional<int> movePlayer(int roll) override { return movePlayer_(roll); }
-  virtual Question readQuestion(int location) override { return readQuestion_(location); }
+  virtual std::optional<Question> readQuestion(int location) override
+  {
+    return readQuestion_(location);
+  }
   virtual Answer askQuestion(Question question) override { return askQuestion_(question); }
   virtual bool isAnswerCorrect(Answer answer) override { return isAnswerCorrect_(answer); }
   virtual void onCorrectAnswer() override { return onCorrectAnswer_(); }
@@ -53,7 +56,7 @@ struct FakeGameTurn : public GameTurn {
 
   std::function<int()> rollDice_;
   std::function<std::optional<int>(int)> movePlayer_;
-  std::function<Question(int)> readQuestion_;
+  std::function<std::optional<Question>(int)> readQuestion_;
   std::function<Answer(Question)> askQuestion_;
   std::function<bool(Answer)> isAnswerCorrect_;
   std::function<void()> onCorrectAnswer_;
@@ -154,7 +157,7 @@ TEST_CASE("Players turn is over if they cannot move.", "[Game]")
     turn->isAnswerCorrect_ = [&](Answer) -> bool {
       throw "Unexpected function call isAnswerCorrect().";
     };
-    turn->readQuestion_ = [&](int) -> Question {
+    turn->readQuestion_ = [&](int) -> std::optional<Question> {
       throw "Unexpected function call readQuestion().";
     };
     return turn;
@@ -180,6 +183,28 @@ TEST_CASE("Players are asked questions.", "[Game]")
       CHECK(question.category == Category::Science);
       CHECK(question.text == "test question " + std::to_string(game.currentTurn()));
       return Answer{};
+    };
+    return turn;
+  };
+  game.run();
+}
+
+TEST_CASE("Players turn is over if there are no more questions.", "[Game]")
+{
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int playerId) {
+    if (playerId == 1)
+      return std::make_unique<FakeGameTurn>();
+
+    auto turn           = std::make_unique<FakeGameTurn>();
+    turn->readQuestion_ = [&](int) { return std::nullopt; };
+    turn->askQuestion_  = [&](Question) -> Answer {
+      throw "Unexpected function call askQuestion().";
+    };
+    turn->isAnswerCorrect_ = [&](Answer) -> bool {
+      throw "Unexpected function call isAnswerCorrect().";
     };
     return turn;
   };
@@ -218,18 +243,18 @@ TEST_CASE("Question categories are assigned in cyclical order.", "[TriviaGameTur
   auto player       = Player{"test player", {0, 0, false}};
 
   auto turn = TriviaGameTurn(player, questionPool, devNull);
-  REQUIRE(turn.readQuestion(0).category == Category::Pop);
-  REQUIRE(turn.readQuestion(1).category == Category::Science);
-  REQUIRE(turn.readQuestion(2).category == Category::Sports);
-  REQUIRE(turn.readQuestion(3).category == Category::Rock);
-  REQUIRE(turn.readQuestion(4).category == Category::Pop);
-  REQUIRE(turn.readQuestion(5).category == Category::Science);
-  REQUIRE(turn.readQuestion(6).category == Category::Sports);
-  REQUIRE(turn.readQuestion(7).category == Category::Rock);
-  REQUIRE(turn.readQuestion(8).category == Category::Pop);
-  REQUIRE(turn.readQuestion(9).category == Category::Science);
-  REQUIRE(turn.readQuestion(10).category == Category::Sports);
-  REQUIRE(turn.readQuestion(11).category == Category::Rock);
+  REQUIRE(turn.readQuestion(0)->category == Category::Pop);
+  REQUIRE(turn.readQuestion(1)->category == Category::Science);
+  REQUIRE(turn.readQuestion(2)->category == Category::Sports);
+  REQUIRE(turn.readQuestion(3)->category == Category::Rock);
+  REQUIRE(turn.readQuestion(4)->category == Category::Pop);
+  REQUIRE(turn.readQuestion(5)->category == Category::Science);
+  REQUIRE(turn.readQuestion(6)->category == Category::Sports);
+  REQUIRE(turn.readQuestion(7)->category == Category::Rock);
+  REQUIRE(turn.readQuestion(8)->category == Category::Pop);
+  REQUIRE(turn.readQuestion(9)->category == Category::Science);
+  REQUIRE(turn.readQuestion(10)->category == Category::Sports);
+  REQUIRE(turn.readQuestion(11)->category == Category::Rock);
 }
 
 TEST_CASE("Pops questions from the pool with category corresponding to the location.",
@@ -267,8 +292,8 @@ TEST_CASE("Questions are consumed in the order they were added.", "[TriviaGameTu
   auto player       = Player{"test player", {0, 0, false}};
 
   auto turn = TriviaGameTurn(player, questionPool, devNull);
-  REQUIRE(turn.readQuestion(0).text == "Pop 1");
-  REQUIRE(turn.readQuestion(0).text == "Pop 2");
+  REQUIRE(turn.readQuestion(0)->text == "Pop 1");
+  REQUIRE(turn.readQuestion(0)->text == "Pop 2");
 }
 
 TEST_CASE("The question is logged.", "[TriviaGameTurn]")

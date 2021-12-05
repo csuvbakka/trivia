@@ -27,14 +27,14 @@ class TriviaGameTurn : public GameTurn {
 
   virtual int rollDice() const override;
   virtual std::optional<int> movePlayer(int roll) override;
-  virtual Question readQuestion(int location) override;
+  virtual std::optional<Question> readQuestion(int location) override;
   virtual Answer askQuestion(Question question) override;
   virtual bool isAnswerCorrect(Answer answer) override;
   virtual void onCorrectAnswer() override;
   virtual void onIncorrectAnswer() override;
 
  private:
-  std::string nextQuestion(Category category);
+  std::optional<std::string> nextQuestion(Category category);
 
   Player& player_;
   QuestionPool& questionPool_;
@@ -57,4 +57,3 @@ class TriviaGame : public Game {
   QuestionPool questionPool_;
   std::ostream& logger_;
 };
-
