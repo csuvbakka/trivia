@@ -22,20 +22,26 @@ struct FakeGameTurn : public GameTurn {
         return Question{"test question", Category::Pop};
       })
       , askQuestion_([](Question) { return Answer{}; })
-      , evaluateAnswer_([](Answer) {})
+      , isAnswerCorrect_([](Answer) { return false; })
+      , onCorrectAnswer_([] {})
+      , onIncorrectAnswer_([] {})
   {
   }
   virtual int rollDice() const override { return rollDice_(); }
   virtual std::optional<int> movePlayer(int roll) override { return movePlayer_(roll); }
   virtual Question readQuestion(int location) override { return readQuestion_(location); }
   virtual Answer askQuestion(Question question) override { return askQuestion_(question); }
-  virtual void evaluateAnswer(Answer answer) override { return evaluateAnswer_(answer); }
+  virtual bool isAnswerCorrect(Answer answer) override { return isAnswerCorrect_(answer); }
+  virtual void onCorrectAnswer() override { return onCorrectAnswer_(); }
+  virtual void onIncorrectAnswer() override { return onIncorrectAnswer_(); }
 
   std::function<int()> rollDice_;
   std::function<std::optional<int>(int)> movePlayer_;
   std::function<Question(int)> readQuestion_;
   std::function<Answer(Question)> askQuestion_;
-  std::function<void(Answer)> evaluateAnswer_;
+  std::function<bool(Answer)> isAnswerCorrect_;
+  std::function<void()> onCorrectAnswer_;
+  std::function<void()> onIncorrectAnswer_;
 };
 
 struct FakeGame : public Game {
@@ -146,8 +152,11 @@ TEST_CASE("Answers are evaluated.", "[Game]")
   const int nTurns   = 5;
   auto game          = FakeGame(nPlayers, nTurns);
   game.newTurn_      = [&](int /*playerId*/) {
-    auto turn             = std::make_unique<FakeGameTurn>();
-    turn->evaluateAnswer_ = [&](Answer) { REQUIRE(++nAnswers == game.currentTurn()); };
+    auto turn              = std::make_unique<FakeGameTurn>();
+    turn->isAnswerCorrect_ = [&](Answer) {
+      REQUIRE(++nAnswers == game.currentTurn());
+      return false;
+    };
     return turn;
   };
   game.run();
@@ -212,7 +221,7 @@ TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
   auto player       = Player{"test player", {0, 0, false}};
   auto questionPool = createTestQuestions();
 
-  SECTION("Player can move if it is not in the penalty box.")
+  SECTION("Player can move if they are not in the penalty box.")
   {
     auto turn                 = TriviaGameTurn(player, questionPool);
     player.state.inPenaltyBox = false;
@@ -222,7 +231,7 @@ TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
     CHECK(newLocation.value() == 3);
     REQUIRE(player.state.field == 3);
   }
-  SECTION("Player can move if it is in the penalty box, but rolled odd.")
+  SECTION("Player can move if they are in the penalty box, but rolled odd.")
   {
     auto turn                 = TriviaGameTurn(player, questionPool);
     player.state.inPenaltyBox = true;
@@ -232,7 +241,7 @@ TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
     CHECK(newLocation.value() == 3);
     REQUIRE(player.state.field == 3);
   }
-  SECTION("Player cannot move if it is in the penalty box and rolled even.")
+  SECTION("Player cannot move if they are in the penalty box and rolled even.")
   {
     auto turn                 = TriviaGameTurn(player, questionPool);
     player.state.inPenaltyBox = true;
@@ -241,5 +250,63 @@ TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
     auto newLocation = turn.movePlayer(2);
     CHECK(!newLocation.has_value());
     REQUIRE(player.state.field == 1);
+  }
+}
+
+TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
+{
+  auto questionPool = createTestQuestions();
+  auto player       = Player{"test player", {0, 0, false}};
+
+  SECTION("They get a gold coin if they are not in the penalty box.")
+  {
+    player.state.inPenaltyBox = false;
+    player.state.coins        = 0;
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    turn.onCorrectAnswer();
+    REQUIRE(player.state.coins == 1);
+    turn.onCorrectAnswer();
+    REQUIRE(player.state.coins == 2);
+  }
+  SECTION("They get a gold coin if they are in the penalty box but rolled odd.")
+  {
+    player.state.inPenaltyBox = true;
+    player.state.coins        = 0;
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    turn.movePlayer(3);
+    turn.onCorrectAnswer();
+    REQUIRE(player.state.coins == 1);
+    turn.onCorrectAnswer();
+    REQUIRE(player.state.coins == 2);
+  }
+  SECTION("They get no gold coins if they are in the penalty box and rolled even.")
+  {
+    player.state.inPenaltyBox = true;
+    player.state.coins        = 0;
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    turn.movePlayer(4);
+    turn.onCorrectAnswer();
+    REQUIRE(player.state.coins == 0);
+  }
+}
+
+TEST_CASE("If a player answers incorrectly.", "[TriviaGameTurn]")
+{
+  auto questionPool = createTestQuestions();
+  auto player       = Player{"test player", {0, 0, false}};
+
+  SECTION("They are sent to the penalty box.")
+  {
+    player.state.inPenaltyBox = false;
+    auto turn                 = TriviaGameTurn(player, questionPool);
+    turn.onIncorrectAnswer();
+    REQUIRE(player.state.inPenaltyBox);
+  }
+  SECTION("They get no gold coins.")
+  {
+    player.state.coins = 0;
+    auto turn          = TriviaGameTurn(player, questionPool);
+    turn.onIncorrectAnswer();
+    REQUIRE(player.state.coins == 0);
   }
 }

@@ -64,7 +64,11 @@ void Game::run()
       turn->askQuestion(std::move(question));
     }
 
-    turn->evaluateAnswer(Answer{});
+    if (turn->isAnswerCorrect(Answer{}))
+      turn->onCorrectAnswer();
+    else
+      turn->onIncorrectAnswer();
+
     if (didPlayerWin(currentPlayerId))
       break;
   }
@@ -121,27 +125,31 @@ Answer TriviaGameTurn::askQuestion(Question question)
   return {};
 }
 
-void TriviaGameTurn::evaluateAnswer(Answer /*answer*/)
+bool TriviaGameTurn::isAnswerCorrect(Answer /*answer*/)
 {
-  const bool isCorrect = rand() % 9 != 7;
-  if (!isCorrect) {
-    std::cout << "Question was incorrectly answered\n";
-    std::cout << player_.name + " was sent to the penalty box\n";
-    player_.state.inPenaltyBox = true;
-    return;
-  } else {
-    if (player_.state.inPenaltyBox) {
-      if (isGettingOutOfPenaltyBox_) {
-        std::cout << "Answer was correct!!!!\n";
-      } else {
-        return;
-      }
+  return rand() % 9 != 7;
+}
+
+void TriviaGameTurn::onCorrectAnswer()
+{
+  if (player_.state.inPenaltyBox) {
+    if (isGettingOutOfPenaltyBox_) {
+      std::cout << "Answer was correct!!!!\n";
     } else {
-      std::cout << "Answer was corrent!!!!\n";
+      return;
     }
-    player_.state.coins++;
-    std::cout << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
+  } else {
+    std::cout << "Answer was corrent!!!!\n";
   }
+  player_.state.coins++;
+  std::cout << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
+}
+
+void TriviaGameTurn::onIncorrectAnswer()
+{
+  std::cout << "Question was incorrectly answered\n";
+  std::cout << player_.name + " was sent to the penalty box\n";
+  player_.state.inPenaltyBox = true;
 }
 
 std::string TriviaGameTurn::nextQuestion(Category category)

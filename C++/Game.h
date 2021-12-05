@@ -53,7 +53,9 @@ class GameTurn {
   virtual std::optional<int> movePlayer(int roll) = 0;
   virtual Question readQuestion(int location)     = 0;
   virtual Answer askQuestion(Question)            = 0;
-  virtual void evaluateAnswer(Answer)             = 0;
+  virtual bool isAnswerCorrect(Answer)            = 0;
+  virtual void onCorrectAnswer()                  = 0;
+  virtual void onIncorrectAnswer()                = 0;
 };
 
 class Game {
@@ -80,7 +82,9 @@ class TriviaGameTurn : public GameTurn {
   virtual std::optional<int> movePlayer(int roll) override;
   virtual Question readQuestion(int location) override;
   virtual Answer askQuestion(Question question) override;
-  virtual void evaluateAnswer(Answer answer) override;
+  virtual bool isAnswerCorrect(Answer answer) override;
+  virtual void onCorrectAnswer() override;
+  virtual void onIncorrectAnswer() override;
 
  private:
   std::string nextQuestion(Category category);
