@@ -212,6 +212,26 @@ TEST_CASE("Game ends if the win condition is satisfied.", "[Game]")
   REQUIRE(game.currentTurn() == 5);
 }
 
+TEST_CASE("Question categories are assigned in cyclical order.", "[TriviaGameTurn]")
+{
+  auto questionPool = createTestQuestions();
+  auto player       = Player{"test player", {0, 0, false}};
+
+  auto turn = TriviaGameTurn(player, questionPool, devNull);
+  REQUIRE(turn.readQuestion(0).category == Category::Pop);
+  REQUIRE(turn.readQuestion(1).category == Category::Science);
+  REQUIRE(turn.readQuestion(2).category == Category::Sports);
+  REQUIRE(turn.readQuestion(3).category == Category::Rock);
+  REQUIRE(turn.readQuestion(4).category == Category::Pop);
+  REQUIRE(turn.readQuestion(5).category == Category::Science);
+  REQUIRE(turn.readQuestion(6).category == Category::Sports);
+  REQUIRE(turn.readQuestion(7).category == Category::Rock);
+  REQUIRE(turn.readQuestion(8).category == Category::Pop);
+  REQUIRE(turn.readQuestion(9).category == Category::Science);
+  REQUIRE(turn.readQuestion(10).category == Category::Sports);
+  REQUIRE(turn.readQuestion(11).category == Category::Rock);
+}
+
 TEST_CASE("Pops questions from the pool with category corresponding to the location.",
           "[TriviaGameTurn]")
 {
@@ -221,40 +241,34 @@ TEST_CASE("Pops questions from the pool with category corresponding to the locat
   auto turn = TriviaGameTurn(player, questionPool, devNull);
   SECTION("Category Pop")
   {
-    REQUIRE(turn.readQuestion(0).category == Category::Pop);
+    turn.readQuestion(0);
     REQUIRE(questionPool[Category::Pop].size() == 2);
-    REQUIRE(turn.readQuestion(4).category == Category::Pop);
-    REQUIRE(questionPool[Category::Pop].size() == 1);
-    REQUIRE(turn.readQuestion(8).category == Category::Pop);
-    REQUIRE(questionPool[Category::Pop].size() == 0);
   }
   SECTION("Category Science")
   {
-    REQUIRE(turn.readQuestion(1).category == Category::Science);
+    turn.readQuestion(1);
     REQUIRE(questionPool[Category::Science].size() == 2);
-    REQUIRE(turn.readQuestion(5).category == Category::Science);
-    REQUIRE(questionPool[Category::Science].size() == 1);
-    REQUIRE(turn.readQuestion(9).category == Category::Science);
-    REQUIRE(questionPool[Category::Science].size() == 0);
   }
   SECTION("Category Sports")
   {
-    REQUIRE(turn.readQuestion(2).category == Category::Sports);
+    turn.readQuestion(2);
     REQUIRE(questionPool[Category::Sports].size() == 2);
-    REQUIRE(turn.readQuestion(6).category == Category::Sports);
-    REQUIRE(questionPool[Category::Sports].size() == 1);
-    REQUIRE(turn.readQuestion(10).category == Category::Sports);
-    REQUIRE(questionPool[Category::Sports].size() == 0);
   }
   SECTION("Category Rock")
   {
-    REQUIRE(turn.readQuestion(3).category == Category::Rock);
+    turn.readQuestion(3);
     REQUIRE(questionPool[Category::Rock].size() == 2);
-    REQUIRE(turn.readQuestion(7).category == Category::Rock);
-    REQUIRE(questionPool[Category::Rock].size() == 1);
-    REQUIRE(turn.readQuestion(11).category == Category::Rock);
-    REQUIRE(questionPool[Category::Rock].size() == 0);
   }
+}
+
+TEST_CASE("Questions are consumed in the order they were added.", "[TriviaGameTurn]")
+{
+  auto questionPool = createTestQuestions();
+  auto player       = Player{"test player", {0, 0, false}};
+
+  auto turn = TriviaGameTurn(player, questionPool, devNull);
+  REQUIRE(turn.readQuestion(0).text == "Pop 1");
+  REQUIRE(turn.readQuestion(0).text == "Pop 2");
 }
 
 TEST_CASE("The question is logged.", "[TriviaGameTurn]")
@@ -282,7 +296,7 @@ TEST_CASE("Dice roll is logged.", "[TriviaGameTurn]")
                StartsWith(player.name + " is the current player\nThey have rolled a "));
 }
 
-TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
+TEST_CASE("Player movement.", "[TriviaGameTurn]")
 {
   auto player       = Player{"test player", {0, 0, false}};
   auto questionPool = createTestQuestions();
@@ -315,6 +329,17 @@ TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
 
     auto newLocation = turn.movePlayer(2);
     CHECK(!newLocation.has_value());
+    REQUIRE(player.state.field == 1);
+  }
+  SECTION("The board is circular and has 12 fields.")
+  {
+    auto turn          = TriviaGameTurn(player, questionPool, devNull);
+    player.state.field = 10;
+    turn.movePlayer(7);
+    REQUIRE(player.state.field == 5);
+    turn.movePlayer(7);
+    REQUIRE(player.state.field == 0);
+    turn.movePlayer(13);
     REQUIRE(player.state.field == 1);
   }
   SECTION("Player's new location is logged if they are not in the penalty box.")
@@ -406,11 +431,16 @@ TEST_CASE("If a player answers incorrectly.", "[TriviaGameTurn]")
   }
 }
 
+TEST_CASE("A game requires at least 2 players.", "[TriviaGame]")
+{
+  auto game = TriviaGame::Create({"a single player"}, createTestQuestions(), devNull);
+  REQUIRE(!game.has_value());
+}
+
 TEST_CASE("Player info is logged when the game is created.", "[TriviaGame]")
 {
-  auto questionPool = createTestQuestions();
   std::ostringstream logger;
-  auto game = TriviaGame::Create({"A", "B"}, questionPool, logger);
+  auto game = TriviaGame::Create({"A", "B"}, createTestQuestions(), logger);
   const std::string expectedMsg =
       "A was added\nThey are player number 1\nB was added\nThey are player number 2\n";
   REQUIRE(logger.str() == expectedMsg);
