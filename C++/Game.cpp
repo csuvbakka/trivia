@@ -137,16 +137,11 @@ bool TriviaGameTurn::isAnswerCorrect(Answer /*answer*/)
 
 void TriviaGameTurn::onCorrectAnswer()
 {
-  if (player_.state.inPenaltyBox) {
-    if (isGettingOutOfPenaltyBox_) {
-      logger_ << "Answer was correct!!!!\n";
-    } else {
-      return;
-    }
-  } else {
-    logger_ << "Answer was correct!!!!\n";
-  }
+  if (player_.state.inPenaltyBox && !isGettingOutOfPenaltyBox_)
+    return;
+
   player_.state.coins++;
+  logger_ << "Answer was correct!!!!\n";
   logger_ << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
 }
 
