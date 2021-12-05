@@ -11,7 +11,9 @@ Category categoryForField(int field)
 }
 }  // namespace
 
-TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool, std::ostream& logger)
+TriviaGame::TriviaGame(std::vector<TriviaPlayer> players,
+                       TriviaQuestionPool questionPool,
+                       std::ostream& logger)
     : Game(players.size())
     , players_(std::move(players))
     , questionPool_(std::move(questionPool))
@@ -20,17 +22,17 @@ TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool, s
 }
 
 std::optional<TriviaGame> TriviaGame::Create(std::vector<std::string> playerNames,
-                                             QuestionPool questionPool,
+                                             TriviaQuestionPool questionPool,
                                              std::ostream& logger)
 {
   if (playerNames.size() < 2)
     return std::nullopt;
 
-  std::vector<Player> players;
+  std::vector<TriviaPlayer> players;
   players.reserve(playerNames.size());
 
   for (auto&& name : playerNames) {
-    players.emplace_back(std::move(name), Player::State{0, 0, false});
+    players.emplace_back(std::move(name), TriviaPlayer::State{0, 0, false});
     logger << players.back().name << " was added\n";
     logger << "They are player number " << players.size() << "\n";
   }
@@ -48,7 +50,9 @@ bool TriviaGame::didPlayerWin(int playerId) const
   return players_[playerId].state.coins == 6;
 }
 
-TriviaGameTurn::TriviaGameTurn(Player& player, QuestionPool& questionPool, std::ostream& logger)
+TriviaGameTurn::TriviaGameTurn(TriviaPlayer& player,
+                               TriviaQuestionPool& questionPool,
+                               std::ostream& logger)
     : player_(player), questionPool_(questionPool), logger_(logger)
 {
 }

@@ -11,7 +11,7 @@ namespace {
 using Catch::Matchers::EndsWith;
 using Catch::Matchers::StartsWith;
 
-QuestionPool createTestQuestions()
+TriviaQuestionPool createTestQuestions()
 {
   return {
       {Category::Pop, {"Pop 1", "Pop 2", "Pop 3"}},
@@ -240,7 +240,7 @@ TEST_CASE("Game ends if the win condition is satisfied.", "[Game]")
 TEST_CASE("Question categories are assigned in cyclical order.", "[TriviaGameTurn]")
 {
   auto questionPool = createTestQuestions();
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
   auto turn = TriviaGameTurn(player, questionPool, devNull);
   REQUIRE(turn.readQuestion(0)->category == Category::Pop);
@@ -261,7 +261,7 @@ TEST_CASE("Pops questions from the pool with category corresponding to the locat
           "[TriviaGameTurn]")
 {
   auto questionPool = createTestQuestions();
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
   auto turn = TriviaGameTurn(player, questionPool, devNull);
   SECTION("Category Pop")
@@ -289,7 +289,7 @@ TEST_CASE("Pops questions from the pool with category corresponding to the locat
 TEST_CASE("Questions are consumed in the order they were added.", "[TriviaGameTurn]")
 {
   auto questionPool = createTestQuestions();
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
   auto turn = TriviaGameTurn(player, questionPool, devNull);
   REQUIRE(turn.readQuestion(0)->text == "Pop 1");
@@ -298,7 +298,7 @@ TEST_CASE("Questions are consumed in the order they were added.", "[TriviaGameTu
 
 TEST_CASE("The question is logged.", "[TriviaGameTurn]")
 {
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
   auto questionPool = createTestQuestions();
 
   std::ostringstream logger;
@@ -310,7 +310,7 @@ TEST_CASE("The question is logged.", "[TriviaGameTurn]")
 
 TEST_CASE("Dice roll is logged.", "[TriviaGameTurn]")
 {
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
   auto questionPool = createTestQuestions();
 
   std::ostringstream logger;
@@ -323,7 +323,7 @@ TEST_CASE("Dice roll is logged.", "[TriviaGameTurn]")
 
 TEST_CASE("Player movement.", "[TriviaGameTurn]")
 {
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
   auto questionPool = createTestQuestions();
 
   SECTION("Player can move if they are not in the penalty box.")
@@ -405,7 +405,7 @@ TEST_CASE("Player movement.", "[TriviaGameTurn]")
 TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
 {
   auto questionPool = createTestQuestions();
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
   SECTION("They get a gold coin.")
   {
@@ -429,7 +429,7 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
 TEST_CASE("If a player answers incorrectly.", "[TriviaGameTurn]")
 {
   auto questionPool = createTestQuestions();
-  auto player       = Player{"test player", {0, 0, false}};
+  auto player       = TriviaPlayer{"test player", {0, 0, false}};
 
   SECTION("They are sent to the penalty box.")
   {
