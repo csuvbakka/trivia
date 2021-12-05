@@ -85,7 +85,7 @@ std::optional<int> TriviaGameTurn::movePlayer(int roll)
 std::optional<Question> TriviaGameTurn::readQuestion(int location)
 {
   const auto category = categoryForField(location);
-  const auto question = nextQuestion(category);
+  auto question       = nextQuestion(category);
   if (!question.has_value())
     return std::nullopt;
 
