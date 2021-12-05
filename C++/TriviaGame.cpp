@@ -1,14 +1,13 @@
 #include "TriviaGame.h"
 
+#include <array>
+
 namespace {
 Category categoryForField(int field)
 {
-  switch (field % 4) {
-    case 0: return Category::Pop;
-    case 1: return Category::Science;
-    case 2: return Category::Sports;
-    default: return Category::Rock;
-  }
+  static constexpr const std::array<Category, 4> categories = {
+      Category::Pop, Category::Science, Category::Sports, Category::Rock};
+  return categories[field % categories.size()];
 }
 }  // namespace
 
