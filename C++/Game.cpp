@@ -144,7 +144,7 @@ void TriviaGameTurn::onCorrectAnswer()
       return;
     }
   } else {
-    logger_ << "Answer was corrent!!!!\n";
+    logger_ << "Answer was correct!!!!\n";
   }
   player_.state.coins++;
   logger_ << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";

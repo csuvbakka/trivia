@@ -369,7 +369,7 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
     player.state.coins        = 0;
     auto turn                 = TriviaGameTurn(player, questionPool, logger);
     turn.onCorrectAnswer();
-    REQUIRE(logger.str() == "Answer was corrent!!!!\n" + player.name + " now has 1 Gold Coins.\n");
+    REQUIRE(logger.str() == "Answer was correct!!!!\n" + player.name + " now has 1 Gold Coins.\n");
   }
   SECTION("Logging when player is in penalty box and rolled odd.")
   {
