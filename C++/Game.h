@@ -91,7 +91,6 @@ class TriviaGameTurn : public GameTurn {
 
   Player& player_;
   QuestionPool& questionPool_;
-  bool isGettingOutOfPenaltyBox_;
   std::ostream& logger_;
 };
 

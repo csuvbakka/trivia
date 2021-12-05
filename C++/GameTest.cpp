@@ -332,9 +332,8 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
   auto questionPool = createTestQuestions();
   auto player       = Player{"test player", {0, 0, false}};
 
-  SECTION("They get a gold coin if they are not in the penalty box.")
+  SECTION("They get a gold coin.")
   {
-    player.state.inPenaltyBox = false;
     player.state.coins        = 0;
     auto turn                 = TriviaGameTurn(player, questionPool, devNull);
     turn.onCorrectAnswer();
@@ -342,55 +341,13 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
     turn.onCorrectAnswer();
     REQUIRE(player.state.coins == 2);
   }
-  SECTION("They get a gold coin if they are in the penalty box and rolled odd.")
-  {
-    player.state.inPenaltyBox = true;
-    player.state.coins        = 0;
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
-    turn.movePlayer(3);
-    turn.onCorrectAnswer();
-    REQUIRE(player.state.coins == 1);
-    turn.onCorrectAnswer();
-    REQUIRE(player.state.coins == 2);
-  }
-  SECTION("They get no gold coins if they are in the penalty box and rolled even.")
-  {
-    player.state.inPenaltyBox = true;
-    player.state.coins        = 0;
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
-    turn.movePlayer(4);
-    turn.onCorrectAnswer();
-    REQUIRE(player.state.coins == 0);
-  }
-  SECTION("Logging when player is not in penalty box.")
+  SECTION("The number of coins is logged.")
   {
     std::ostringstream logger;
-    player.state.inPenaltyBox = false;
     player.state.coins        = 0;
     auto turn                 = TriviaGameTurn(player, questionPool, logger);
     turn.onCorrectAnswer();
     REQUIRE(logger.str() == "Answer was correct!!!!\n" + player.name + " now has 1 Gold Coins.\n");
-  }
-  SECTION("Logging when player is in penalty box and rolled odd.")
-  {
-    std::ostringstream logger;
-    player.state.inPenaltyBox = true;
-    player.state.coins        = 0;
-    auto turn                 = TriviaGameTurn(player, questionPool, logger);
-    turn.movePlayer(3);
-    turn.onCorrectAnswer();
-    REQUIRE_THAT(logger.str(),
-                 EndsWith("Answer was correct!!!!\n" + player.name + " now has 1 Gold Coins.\n"));
-  }
-  SECTION("Logging when player is in penalty box and rolled even.")
-  {
-    std::ostringstream logger;
-    player.state.inPenaltyBox = true;
-    player.state.coins        = 0;
-    auto turn                 = TriviaGameTurn(player, questionPool, logger);
-    turn.movePlayer(4);
-    turn.onCorrectAnswer();
-    REQUIRE_THAT(logger.str(), EndsWith(player.name + " is not getting out of the penalty box\n"));
   }
 }
 

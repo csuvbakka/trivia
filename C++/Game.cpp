@@ -66,16 +66,15 @@ void Game::run()
     auto turn       = newTurn(currentPlayerId);
     if (const auto newLocation = turn->movePlayer(turn->rollDice())) {
       auto question = turn->readQuestion(*newLocation);
-      turn->askQuestion(std::move(question));
+      auto answer   = turn->askQuestion(std::move(question));
+      if (turn->isAnswerCorrect(answer))
+        turn->onCorrectAnswer();
+      else
+        turn->onIncorrectAnswer();
+
+      if (didPlayerWin(currentPlayerId))
+        break;
     }
-
-    if (turn->isAnswerCorrect(Answer{}))
-      turn->onCorrectAnswer();
-    else
-      turn->onIncorrectAnswer();
-
-    if (didPlayerWin(currentPlayerId))
-      break;
   }
 }
 
@@ -101,10 +100,9 @@ std::optional<int> TriviaGameTurn::movePlayer(int roll)
 {
   if (player_.state.inPenaltyBox) {
     if (roll % 2 != 0) {
-      isGettingOutOfPenaltyBox_ = true;
+      player_.state.inPenaltyBox = false;
       logger_ << player_.name << " is getting out of the penalty box\n";
     } else {
-      isGettingOutOfPenaltyBox_ = false;
       logger_ << player_.name << " is not getting out of the penalty box\n";
       return std::nullopt;
     }
@@ -137,9 +135,6 @@ bool TriviaGameTurn::isAnswerCorrect(Answer /*answer*/)
 
 void TriviaGameTurn::onCorrectAnswer()
 {
-  if (player_.state.inPenaltyBox && !isGettingOutOfPenaltyBox_)
-    return;
-
   player_.state.coins++;
   logger_ << "Answer was correct!!!!\n";
   logger_ << player_.name << " now has " << player_.state.coins << " Gold Coins.\n";
