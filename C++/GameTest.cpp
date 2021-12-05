@@ -137,6 +137,35 @@ TEST_CASE("Players move then get a question corresponding to their current locat
   REQUIRE(locations == std::vector<int>{1, 2, 3, 4, 5});
 }
 
+TEST_CASE("Players turn is over if they cannot move.", "[Game]")
+{
+  const auto unexpectedCall = [] { throw "unexpected function call"; };
+  const int nPlayers        = 3;
+  const int nTurns          = 5;
+  auto game                 = FakeGame(nPlayers, nTurns);
+  game.newTurn_             = [&](int playerId) {
+    if (playerId == 1)
+      return std::make_unique<FakeGameTurn>();
+
+    auto turn          = std::make_unique<FakeGameTurn>();
+    turn->movePlayer_  = [](int) { return std::nullopt; };
+    turn->askQuestion_ = [&](Question) {
+      unexpectedCall();
+      return Answer{};
+    };
+    turn->isAnswerCorrect_ = [&](Answer) -> bool {
+      unexpectedCall();
+      return false;
+    };
+    turn->readQuestion_ = [&](int) -> Question {
+      unexpectedCall();
+      return {};
+    };
+    return turn;
+  };
+  game.run();
+}
+
 TEST_CASE("Players are asked questions.", "[Game]")
 {
   std::vector<int> locations;
@@ -334,8 +363,8 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
 
   SECTION("They get a gold coin.")
   {
-    player.state.coins        = 0;
-    auto turn                 = TriviaGameTurn(player, questionPool, devNull);
+    player.state.coins = 0;
+    auto turn          = TriviaGameTurn(player, questionPool, devNull);
     turn.onCorrectAnswer();
     REQUIRE(player.state.coins == 1);
     turn.onCorrectAnswer();
@@ -344,8 +373,8 @@ TEST_CASE("If a player answers correctly.", "[TriviaGameTurn]")
   SECTION("The number of coins is logged.")
   {
     std::ostringstream logger;
-    player.state.coins        = 0;
-    auto turn                 = TriviaGameTurn(player, questionPool, logger);
+    player.state.coins = 0;
+    auto turn          = TriviaGameTurn(player, questionPool, logger);
     turn.onCorrectAnswer();
     REQUIRE(logger.str() == "Answer was correct!!!!\n" + player.name + " now has 1 Gold Coins.\n");
   }
