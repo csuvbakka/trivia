@@ -96,10 +96,9 @@ class TriviaGameTurn : public GameTurn {
 
 class TriviaGame : public Game {
  public:
-  static TriviaGame Create(std::vector<std::string> playerNames,
-                           QuestionPool questionPool,
-                           std::ostream& logger);
-  bool isPlayable();
+  static std::optional<TriviaGame> Create(std::vector<std::string> playerNames,
+                                          QuestionPool questionPool,
+                                          std::ostream& logger);
 
  private:
   TriviaGame(std::vector<Player> players, QuestionPool questionPool, std::ostream& logger);

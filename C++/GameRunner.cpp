@@ -23,5 +23,6 @@ int main()
 {
   srand(time(NULL));
   auto aGame = TriviaGame::Create({"Chet", "Pat", "Sue"}, generateQuestions(), std::cout);
-  aGame.run();
+  if (aGame.has_value())
+    aGame->run();
 }

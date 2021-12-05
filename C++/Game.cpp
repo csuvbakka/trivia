@@ -25,10 +25,13 @@ TriviaGame::TriviaGame(std::vector<Player> players, QuestionPool questionPool, s
 {
 }
 
-TriviaGame TriviaGame::Create(std::vector<std::string> playerNames,
-                              QuestionPool questionPool,
-                              std::ostream& logger)
+std::optional<TriviaGame> TriviaGame::Create(std::vector<std::string> playerNames,
+                                             QuestionPool questionPool,
+                                             std::ostream& logger)
 {
+  if (playerNames.size() < 2)
+    return std::nullopt;
+
   std::vector<Player> players;
   players.reserve(playerNames.size());
 
@@ -39,11 +42,6 @@ TriviaGame TriviaGame::Create(std::vector<std::string> playerNames,
   }
 
   return TriviaGame(std::move(players), std::move(questionPool), logger);
-}
-
-bool TriviaGame::isPlayable()
-{
-  return (players_.size() >= 2);
 }
 
 std::unique_ptr<GameTurn> TriviaGame::newTurn(int playerId)
