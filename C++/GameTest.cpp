@@ -100,7 +100,7 @@ TEST_CASE("Players take turns in cyclical order.", "[Game]")
   REQUIRE(playerIds == std::vector<int>{0, 1, 2, 0, 1});
 }
 
-TEST_CASE("Players roll the dice then move.", "[Game]")
+TEST_CASE("Players roll the dice then move that many places.", "[Game]")
 {
   const int nPlayers = 3;
   const int nTurns   = 5;
@@ -139,27 +139,23 @@ TEST_CASE("Players move then get a question corresponding to their current locat
 
 TEST_CASE("Players turn is over if they cannot move.", "[Game]")
 {
-  const auto unexpectedCall = [] { throw "unexpected function call"; };
-  const int nPlayers        = 3;
-  const int nTurns          = 5;
-  auto game                 = FakeGame(nPlayers, nTurns);
-  game.newTurn_             = [&](int playerId) {
+  const int nPlayers = 3;
+  const int nTurns   = 5;
+  auto game          = FakeGame(nPlayers, nTurns);
+  game.newTurn_      = [&](int playerId) {
     if (playerId == 1)
       return std::make_unique<FakeGameTurn>();
 
     auto turn          = std::make_unique<FakeGameTurn>();
     turn->movePlayer_  = [](int) { return std::nullopt; };
-    turn->askQuestion_ = [&](Question) {
-      unexpectedCall();
-      return Answer{};
+    turn->askQuestion_ = [&](Question) -> Answer {
+      throw "Unexpected function call askQuestion().";
     };
     turn->isAnswerCorrect_ = [&](Answer) -> bool {
-      unexpectedCall();
-      return false;
+      throw "Unexpected function call isAnswerCorrect().";
     };
     turn->readQuestion_ = [&](int) -> Question {
-      unexpectedCall();
-      return {};
+      throw "Unexpected function call readQuestion().";
     };
     return turn;
   };
@@ -301,7 +297,7 @@ TEST_CASE("Players move after rolling the dice.", "[TriviaGameTurn]")
     CHECK(newLocation.value() == 3);
     REQUIRE(player.state.field == 3);
   }
-  SECTION("Player can move if they are in the penalty box, but rolled odd.")
+  SECTION("Player can move if they are in the penalty box and rolled odd.")
   {
     auto turn                 = TriviaGameTurn(player, questionPool, devNull);
     player.state.inPenaltyBox = true;
@@ -399,7 +395,7 @@ TEST_CASE("If a player answers incorrectly.", "[TriviaGameTurn]")
     turn.onIncorrectAnswer();
     REQUIRE(player.state.coins == 0);
   }
-  SECTION("Logging.")
+  SECTION("It is added to the log.")
   {
     std::ostringstream logger;
     auto turn = TriviaGameTurn(player, questionPool, logger);
