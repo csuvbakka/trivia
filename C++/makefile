@@ -1,5 +1,5 @@
 CLIENT_FILES = GameRunner.cpp
-GAME_FILES = Game.cpp Game.h
+GAME_FILES = Game.cpp TriviaGame.cpp
 TEST_FILES = GameTest.cpp $(GAME_FILES)
 CC = g++
 OPTS = -std=c++17 -Wall -Wextra -Werror

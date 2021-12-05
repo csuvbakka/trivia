@@ -1,6 +1,6 @@
-﻿#include <stdlib.h>
-#include "Game.h"
+﻿#include "TriviaGame.h"
 
+#include <stdlib.h>
 #include <string>
 
 QuestionPool generateQuestions()
