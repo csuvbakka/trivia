@@ -1,12 +1,9 @@
 #pragma once
 
-#include <iostream>
-#include <list>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string_view>
-#include <unordered_map>
-#include <vector>
 
 enum class Category { Pop, Science, Sports, Rock };
 constexpr std::string_view ToStringView(Category category)

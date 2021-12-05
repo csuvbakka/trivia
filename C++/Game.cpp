@@ -1,10 +1,5 @@
 ﻿#include "Game.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-
 Game::Game(int nPlayers) : nPlayers_(nPlayers) {}
 
 void Game::run()

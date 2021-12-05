@@ -4,7 +4,7 @@
 #include "TriviaGame.h"
 
 #include <functional>
-#include <iostream>
+#include <ostream>
 #include <sstream>
 
 namespace {

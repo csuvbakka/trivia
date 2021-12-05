@@ -2,7 +2,11 @@
 
 #include "Game.h"
 
+#include <list>
+#include <ostream>
+#include <vector>
 #include <string>
+#include <unordered_map>
 
 struct TriviaPlayer {
   struct State {
